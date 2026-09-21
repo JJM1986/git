@@ -18,6 +18,7 @@ Zielbögen (je ein eigener Prompt):
 |---|---|---|---|
 | 1 | BEI_BW A – Basisbogen | [02_prompt_basisbogen.txt](02_prompt_basisbogen.txt) · [Seite für die Mitarbeitende](https://claude.ai/artifact/TpZRBTJ2EdCQZ6CVqKPU9L) ([HTML](04_seite_basisbogen_assistent.html)) | fertig, getestet an Beispiel 1 |
 | 2 | BEI_BW C – Erhebungsbogen (Bedarfsermittlung) | [05_prompt_erhebungsbogen_c.txt](05_prompt_erhebungsbogen_c.txt) · [Seite](https://claude.ai/artifact/TKWT9qCYg8JVpRSMVtfWSR) ([HTML](07_seite_erhebungsbogen_assistent.html)) | fertig, getestet an Beispiel 1 |
+| 2b | BEI_BW C, **direkt in Word** (ohne Kopieren, ohne Prompt-Anpassung) | [08_prompt_erhebungsbogen_c_direkt.txt](08_prompt_erhebungsbogen_c_direkt.txt) + [tools/fill_bei_bw_c.py](tools/fill_bei_bw_c.py) | fertig, getestet an Beispiel 1 |
 | 3 | BEI_BW B – Gesundheitsbogen | – | nächster Schritt |
 | 4 | GP-Vorbereitung | – | danach (offene Frage, siehe unten) |
 
@@ -99,6 +100,37 @@ Die Hinweistexte der Vorlage werden so behandelt:
 Zusätzlich hat der Prompt eine Abdeckungsprüfung: Er zählt die Protokollzeilen und
 listet nicht zugeordnete und mehrfach zugeordnete Sätze auf. Damit geht kein Satz
 verloren und keiner steht doppelt im selben Block.
+
+## Variante „direkt in Word“ (Bogen C)
+
+Wunsch: nichts kopieren, nichts am Prompt anpassen. Dafür ist die Arbeit geteilt:
+
+1. **Die KI ordnet zu.** Sie ermittelt Name, Gesprächsdatum und Sprecherkürzel selbst
+   aus Vorlage und Protokoll und erzeugt eine Zuordnung als JSON (festes Schema,
+   wörtliche Zitate je Block).
+2. **Ein Skript schreibt.** `tools/fill_bei_bw_c.py` öffnet die Word-Vorlage, setzt
+   die Datumsangaben in die Hinweiszeilen, hängt die Zitate als Absätze an und übernimmt
+   dabei die Formatierung des jeweiligen Vorlagenabsatzes. Layout, Kopf- und Fußzeile,
+   Tabellen und Aufzählungen bleiben unverändert. Zusätzlich entsteht ein
+   Prüfprotokoll (`*_Pruefprotokoll.txt`) mit nicht und mehrfach zugeordneten Sätzen.
+
+Das Skript steht vollständig im Prompt `08_prompt_erhebungsbogen_c_direkt.txt`. Die
+Mitarbeitende lädt in Nele die Vorlage und das Protokoll hoch, fügt den Prompt ein und
+erhält die ausgefüllte .docx zurück. Voraussetzung ist, dass Nele Python ausführen und
+Dateien zurückgeben kann (bei ChatGPT die Funktion „Datenanalyse“ bzw. Code Interpreter).
+Kann Nele das nicht, gibt sie nur das JSON aus; dann läuft das Skript einmal lokal:
+
+```
+pip install python-docx
+python tools/fill_bei_bw_c.py Vorlage.docx zuordnung.json Ausgabe.docx
+```
+
+Unter Windows genügt `tools/fuellen.cmd Vorlage.docx zuordnung.json Ausgabe.docx`.
+
+Getestet: `tools/zuordnung_beispiel1.json` ist die Zuordnung für Beispiel 1. Das Skript
+erzeugt daraus die ausgefüllte Datei; Inhalt und Absatzstruktur entsprechen dem von
+der Fachkraft ausgefüllten Bogen (Ergänzungszeilen in den Tabellen, „Aus dem Gespräch
+am …“ je Lebensbereich, Aufzählung bei den Umweltfaktoren).
 
 ## Testlauf
 

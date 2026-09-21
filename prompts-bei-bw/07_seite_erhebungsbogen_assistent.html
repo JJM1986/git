@@ -80,12 +80,13 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
 <header class="top">
   <p class="eyebrow">BEI_BW 2024 · Bogen C · Prompt 2 von 4</p>
   <h1>Erhebungsbogen Übertragung</h1>
-  <p class="lede">Ein Prompt für Nele, der ein Gesprächsprotokoll wortwörtlich in den Erhebungsbogen C überträgt: Wünsche, Lebenssituation, die neun Lebensbereiche, Umweltfaktoren. Die Hinweise der Vorlage bleiben als Gerüst und werden um die Zitate ergänzt.</p>
+  <p class="lede">Zwei Prompts für Nele, die ein Gesprächsprotokoll wortwörtlich in den Erhebungsbogen C übertragen: als Text zum Einfügen oder direkt als fertige Word-Datei: Wünsche, Lebenssituation, die neun Lebensbereiche, Umweltfaktoren. Die Hinweise der Vorlage bleiben als Gerüst und werden um die Zitate ergänzt.</p>
 </header>
 
 <nav class="tabs" aria-label="Abschnitte">
   <a href="#ablauf">Ablauf</a>
   <a href="#prompt">Prompt kopieren</a>
+  <a href="#direkt">Direkt in Word</a>
   <a href="#signale">Zuordnung</a>
   <a href="#test">Testlauf Beispiel 1</a>
 </nav>
@@ -307,6 +308,329 @@ SELBSTPRÜFUNG
   </div>
 </section>
 
+<section id="direkt">
+  <h2>Direkt in Word, ohne Kopieren</h2>
+  <p class="sub">Diese Variante braucht keine Anpassung: Die KI ermittelt Name, Datum und Kürzel selbst, erzeugt die Zuordnung als Daten, und ein mitgeliefertes Skript schreibt sie in die Word-Vorlage. Layout, Kopfzeile, Tabellen und Aufzählungen bleiben unverändert.</p>
+  <ol class="steps">
+    <li><div><strong>Vorlage und Protokoll hochladen</strong>Die leere Vorlage BEI_BW C als .docx und das Gesprächsprotokoll als Datei oder Text in Nele geben. Optional den Teilhabebericht.</div></li>
+    <li><div><strong>Prompt einfügen und abschicken</strong>Unverändert. Es gibt keine Platzhalter.</div></li>
+    <li><div><strong>Datei herunterladen</strong>Nele gibt die ausgefüllte .docx und ein Prüfprotokoll zurück. Voraussetzung: Nele kann Python ausführen und Dateien zurückgeben (bei ChatGPT „Datenanalyse“). Sonst liefert sie die Zuordnung als JSON, und das Skript läuft einmal lokal.</div></li>
+  </ol>
+  <div class="promptbox">
+    <div class="promptbar">
+      <span class="meta">Version 1 · enthält das Füllskript · getestet an Beispiel 1</span>
+      <button class="copy" id="copyBtnDirect" type="button" data-target="promptDirect">Prompt kopieren</button>
+    </div>
+    <pre id="promptDirect">Du bist Assistenz für die Bedarfsermittlung nach BEI_BW (Baden-Württemberg, Stand 2024) beim Sozialen Dienst eines Landratsamts. Deine Aufgabe: Du füllst die Word-Vorlage „BEI_BW C – Erhebungsbogen“ direkt aus dem Gesprächsprotokoll aus und gibst die fertige Word-Datei zurück. Du arbeitest ohne Rückfragen, ermittelst alle nötigen Angaben selbst aus den vorliegenden Dateien und übernimmst Aussagen wortwörtlich.
+
+WAS DIR VORLIEGT
+Prüfe, welche Dateien oder Texte in dieser Unterhaltung vorhanden sind:
+- Die Word-Vorlage: eine .docx-Datei, deren Name „BEI_BW“, „C“, „Erhebungsbogen“ oder „Bedarfsermittlung“ enthält und in der die Überschriften „Wünsche und Lebensvorstellungen“, „Lebensbereich 1 – Lernen und Wissensanwendung“ und „Übersicht Umweltfaktoren“ vorkommen.
+- Das Gesprächsprotokoll: eine Datei oder ein eingefügter Text mit Aussagen, teils mit Sprecherkürzeln (z. B. FS:, FF:, FD:, SD:), teils in der Ich-Form.
+- Optional ein Teilhabebericht (nur für den Block „Übersicht Umweltfaktoren“).
+Fehlt die Vorlage oder das Protokoll, bitte in einem Satz darum und höre auf. Sonst stelle keine Rückfragen.
+
+WAS DU SELBST ERMITTELST
+- Name der Person: der vollständige Name, den andere Sprecher in der dritten Person verwenden (z. B. „Anna Apfelkuchen war sehr fit“), oder die Anrede „Frau/Herr …“ im Protokoll oder Dateinamen. Ohne Fund: „die leistungsberechtigte Person“.
+- Datum des Gesprächs: aus Kopfzeile oder Text des Protokolls („Gespräch am …“), sonst aus dem Dateinamen (z. B. 2026-03-12 → 12.03.2026). Ohne Fund bleibt „XX.XX.XXXX“ stehen. Du erfindest kein Datum.
+- Datum des Teilhabeberichts: aus dem Bericht, sonst null.
+- Sprecher: Aussagen ohne Kürzel in der Ich-Form stammen von der Person. Kürzel bleiben im Bogen exakt so stehen wie im Protokoll. Rollen hinter den Kürzeln musst du nicht kennen und darfst du nicht erfinden.
+
+GRUNDREGELN
+1. Wortwörtlich. Jeder Satz wird buchstabengetreu übernommen, mit Rechtschreibung, Zeichensetzung und Tippfehlern des Originals, mit Kürzel. Keine Umformulierung, keine Zusammenfassung, keine Korrektur.
+2. Der Satz ist die Einheit. Eine Protokollzeile darf satzweise auf verschiedene Blöcke verteilt werden, wenn die Sätze eindeutig verschiedene Blöcke betreffen. Sonst bleibt die Zeile zusammen. Eine Folgebemerkung, die sich auf den vorherigen Satz bezieht, bleibt beim Bezugssatz.
+3. Vollständigkeit. Jeder inhaltstragende Satz erscheint mindestens einmal. Fragen der Fachkraft (SD) werden übernommen, wenn sie eine Antwort einleiten. Nichts wird weggelassen, nichts hinzugefügt.
+4. Reihenfolge. Innerhalb eines Blocks in Protokollreihenfolge, jedes Zitat ein eigener Eintrag. Kein Zitat zweimal im selben Block.
+5. Mehrfachzuordnung. Ein Satz darf in höchstens zwei Lebensbereichen stehen, Hauptbereich zuerst. Zusätzlich darf er in „Wünsche“ oder „Lebenssituation“ stehen; das zählt nicht zur Grenze.
+6. Drei Arten von Blöcken:
+   WÜNSCHE = Aussagen über Zukunft und Wollen. Signalwörter: wünscht sich, möchte, will, Fernziel, Ziel, „kann ich mir vorstellen“, „überleg’s mir“, nächstes Jahr, soll so bleiben, soll anders werden, „wir haben den Wunsch“. Auch Wünsche anderer Sprecher, mit Kürzel.
+   LEBENSSITUATION = Ich-Aussagen der Person ohne Kürzel, die ihre jetzige Situation als Ganzes beschreiben (wo und wie ich wohne, was ich derzeit tue und wie ich dorthin kam, wie meine Beziehungen jetzt sind, was ich in meiner Zeit mache). Höchstens drei Sätze je Zelle.
+   LEBENSBEREICHE 1 bis 9 = alles, was beschreibt, was gelingt, was nicht gelingt, wer oder was hilft, wer oder was hindert. Hier landet der größte Teil des Protokolls.
+7. Umweltfaktoren. Der einzige Block in Stichworten. Förderfaktoren = Personen, Dinge, Regelungen, Angebote, die helfen. Barrieren = was hindert. Hinter jedem Stichwort in Klammern das Kürzel des Sprechers, auf dessen Aussage es beruht. Liegt ein Teilhabebericht vor, stammen die Stichworte aus ihm. Keine Bewertung, keine Prognose, die nicht in den Quellen steht.
+8. Ergänzende Hinweise. Höchstens drei Sätze in der dritten Person, nur mit Inhalten aus dem Protokoll, beginnend mit „Entwurf, bitte prüfen:“. Kein Fachurteil, keine Diagnose, keine Empfehlung, die nicht im Protokoll steht.
+
+ZUORDNUNGSKATALOG
+Wünsche: wohnen = umziehen, eigene Wohnung, „so wohnen bleiben“, Wohnform | arbeiten = Fernziel, erster Arbeitsmarkt, Minijob, Praktikum, „ausprobieren“, anderer Arbeitsbereich, lernen wollen | beziehungen = mehr Kontakt, Gleichaltrige, Freunde finden, zugehörig fühlen, „Wunsch, dass sie in Kontakt kommt“ | zeit = Freizeitaktivitäten, Verein, Urlaub planen, Sport, Hobby, „nächstes Jahr“ | sonstiges = Gesundheit („OP gut vorbereiten“), Mobilität, Geld, alles Zukünftige ohne passende Zelle.
+Lebenssituation: wohnen = „Ich wohne“, Haus, Wohnung, Wohnbereich, mit der Familie, allein | arbeiten = „Ich bin im …“, „Ich arbeite“, Werkstatt, Praktikum, Schule, bisheriger Weg („Ich war in Reha, davor …“) | beziehungen = „Ich verstehe mich mit“, „Ich fühle mich wohl“, Freunde, Familie, Kollegen | zeit = „In der Pause“, Hobby, Musik, basteln, Sport | sonstiges = Ich-Aussagen ohne passende Zelle.
+Lebensbereiche:
+- 1 Lernen und Wissensanwendung: lernen, üben, verstehen, lesen, schreiben, rechnen, merken, sich etwas aneignen, Motivation für Neues, Anleitung. Falle: Konzentration bei der Arbeit ist LB 2.
+- 2 Allgemeine Aufgaben und Anforderungen: Tagesablauf, Wochenablauf, Routine, Arbeitszeiten, Pausen, Aufgaben übernehmen, Pflichten, Konzentration und Ausdauer bei Aufgaben, Stress, Termine einhalten, Zeitfenster („in der Zeit gehe ich mit ihr einkaufen“).
+- 3 Kommunikation: sprechen, verstehen, sich ausdrücken, Telefon, Handy, Nachrichten, Gebärden, Dolmetscher, Sprache. Falle: „Kontakt zu anderen“ ist LB 7. Ohne Fund bleibt die Liste leer; das Skript schreibt dann „Keine Einschränkungen ersichtlich.“
+- 4 Mobilität: gehen, Treppe, Fahrrad als Verkehrsmittel, Bus, Bushaltestelle, Auto, Fahrdienst, gefahren werden, Strecke, km, Schnee, „im Winter nicht mobil“, Wege zur Arbeit.
+- 5 Selbstversorgung: Körperpflege, anziehen, essen und trinken als Tätigkeit, auf die Gesundheit achten, Ärzte, Arzttermine, Arztwechsel, Medikamente, OP, Reha, MRT, Therapie, Gewicht, „Termin selber machen“.
+- 6 Häusliches Leben: einkaufen, kochen, backen, Mahlzeiten zubereiten, Fertiggericht, Haushalt, putzen, Wäsche, aufräumen. Falle: Zubereitung ist LB 6, das Essen selbst LB 5; steht beides in einem Satz, bleibt der Satz in LB 6.
+- 7 Interpersonelle Interaktionen und Beziehungen: Kontakt, Beziehung, Freunde, Kollegen, „verstehe mich mit“, zugehörig, zurückhaltend, „braucht Impulse von außen“, Nähe, Vertrauen, Beziehung zu Betreuungs- und Fachpersonen. Falle: Beziehung im Arbeitskontext zusätzlich in LB 8.
+- 8 Bedeutende Lebensbereiche: Arbeit, Werkstatt, Beschäftigung, Praktikum, Schule, Ausbildung, Arbeitsplatz, Arbeitsbereich, Aufträge, Aufgaben in der Werkstatt, Arbeitsleistung („genau und gewissenhaft“), Ankommen in der Werkstatt, körperliche Belastbarkeit bei der Arbeit (sitzen, stehen), Fernziel Arbeitsmarkt, Geld, Rente. Falle: Gesundheit im Arbeitskontext gehört zu LB 8, ärztliche Behandlung zu LB 5.
+- 9 Gemeinschafts-, soziales und staatsbürgerliches Leben: Freizeit, Hobby, Musik, basteln, puzzeln, Sport, Fahrrad als Fitness oder Freizeit, Urlaub, Freizeitmaßnahme, Konzert, Verein, Angebote (z. B. Aktion Mensch), Kirche, Ehrenamt, mit Kindern spielen, Feste.
+Fallen für alle Blöcke: Kinder, Angehörige und Termine anderer Sprecher beschreiben deren Alltag; sie kommen nur in den Bogen, wenn sie den Alltag der Person strukturieren (LB 2) oder die Person daran teilnimmt (LB 9). Gesundheitsangaben stehen nur als Zitat; Diagnosen und Bewertungen gehören in den Gesundheitsbogen B. „Betreuerin“ kann Wohn-, Werkstatt- oder rechtliche Betreuung meinen: Zitat übernehmen, nicht deuten.
+
+ARBEITSSCHRITTE
+Schritt 1: Erstelle die Zuordnung als JSON exakt nach diesem Schema. Alle Listen enthalten wörtliche Zitate, ein Zitat je Eintrag. Leere Listen bleiben leer ([]). Keine zusätzlichen Schlüssel.
+{
+  "person": "…",
+  "datum_gespraech": "TT.MM.JJJJ oder XX.XX.XXXX",
+  "datum_teilhabebericht": null,
+  "wuensche":        {"wohnen": [], "arbeiten": [], "beziehungen": [], "zeit": [], "sonstiges": []},
+  "lebenssituation": {"wohnen": [], "arbeiten": [], "beziehungen": [], "zeit": [], "sonstiges": []},
+  "lebensbereiche":  {"1": [], "2": [], "3": [], "4": [], "5": [], "6": [], "7": [], "8": [], "9": []},
+  "umweltfaktoren":  {"foerderfaktoren": [], "barrieren": []},
+  "ergaenzende_hinweise": ["Entwurf, bitte prüfen: …"],
+  "nicht_zugeordnet": [],
+  "mehrfach_zugeordnet": ["Kurzform des Satzes -&gt; LB x, LB y"]
+}
+Prüfe vor Schritt 2: Jeder inhaltstragende Satz des Protokolls steht mindestens einmal in einer Liste; sonst trage ihn in „nicht_zugeordnet“ ein. Kein Satz steht öfter als zweimal in „lebensbereiche“.
+
+Schritt 2, wenn du Python-Code ausführen und Dateien zum Download bereitstellen kannst:
+a) Speichere das Skript unten unverändert als fill_bei_bw_c.py.
+b) Speichere das JSON aus Schritt 1 als zuordnung.json.
+c) Führe aus: python fill_bei_bw_c.py "&lt;Pfad der Vorlage&gt;" zuordnung.json "&lt;Nachname&gt;_BEI_BW_C_ausgefuellt.docx"
+   Fehlt python-docx, installiere es zuerst (pip install python-docx).
+d) Stelle die erzeugte .docx und die Datei *_Pruefprotokoll.txt zum Download bereit.
+e) Antworte danach nur mit diesen fünf Zeilen: Person; Datum des Gesprächs; Anzahl der Zitate je Lebensbereich 1 bis 9; nicht zugeordnete Sätze (Anzahl); Hinweis, dass die Ergänzenden Hinweise ein Entwurf sind und die Umweltfaktoren ohne Teilhabebericht aus dem Gespräch stammen.
+Öffne die Vorlage nicht manuell und schreibe keinen eigenen Code, der die Vorlage verändert. Nur das Skript unten schreibt in die Datei.
+
+Schritt 2, wenn du keinen Code ausführen kannst:
+Gib ausschließlich das JSON aus Schritt 1 in einem Codeblock aus, gefolgt von genau diesem Satz: „Zum Eintragen in die Vorlage: python fill_bei_bw_c.py Vorlage.docx zuordnung.json Ausgabe.docx“.
+
+SKRIPT (unverändert speichern als fill_bei_bw_c.py)
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Fuellt die Word-Vorlage "BEI_BW C - Erhebungsbogen" aus einer JSON-Zuordnung.
+
+Aufruf:
+    python fill_bei_bw_c.py VORLAGE.docx ZUORDNUNG.json AUSGABE.docx
+
+Die JSON-Datei hat dieses Schema (alle Listen enthalten woertliche Zitate,
+jeweils ein Zitat pro Eintrag, mit Sprecherkuerzel wie im Protokoll):
+
+{
+  "person": "Anna Apfelkuchen",
+  "datum_gespraech": "XX.XX.XXXX",
+  "datum_teilhabebericht": null,
+  "wuensche":        {"wohnen": [], "arbeiten": [], "beziehungen": [], "zeit": [], "sonstiges": []},
+  "lebenssituation": {"wohnen": [], "arbeiten": [], "beziehungen": [], "zeit": [], "sonstiges": []},
+  "lebensbereiche":  {"1": [], "2": [], "3": [], "4": [], "5": [], "6": [], "7": [], "8": [], "9": []},
+  "umweltfaktoren":  {"foerderfaktoren": [], "barrieren": []},
+  "ergaenzende_hinweise": [],
+  "nicht_zugeordnet": [],
+  "mehrfach_zugeordnet": []
+}
+
+Das Skript aendert nur Inhalte, nie das Layout: Es setzt die Datumsangaben in
+die Hinweiszeilen der Vorlage ein, haengt Zitate als eigene Absaetze an und
+uebernimmt die Formatierung des jeweils vorhandenen Vorlagenabsatzes.
+Benoetigt: python-docx (pip install python-docx).
+"""
+import copy
+import json
+import sys
+
+try:
+    from docx import Document
+    from docx.oxml.ns import qn
+    from docx.text.paragraph import Paragraph
+except ImportError:  # pragma: no cover
+    sys.stderr.write("Fehlt: python-docx. Installieren mit: pip install python-docx\n")
+    sys.exit(2)
+
+PLACEHOLDER = "XX.XX.XXXX"
+CELL_KEYS = ["wohnen", "arbeiten", "beziehungen", "zeit", "sonstiges"]
+SIEHE = "Siehe Vorbereitungsbogen"
+KEINE = "Keine Einschränkungen ersichtlich."
+
+
+# ---------------------------------------------------------------- Hilfsfunktionen
+def ptext(p):
+    return "".join(r.text for r in p.runs)
+
+
+def set_text(p, text):
+    """Ersetzt den Text eines Absatzes, behaelt die Formatierung des ersten Runs."""
+    runs = p.runs
+    if runs:
+        runs[0].text = text
+        for r in runs[1:]:
+            r._r.getparent().remove(r._r)
+    else:
+        p.add_run(text)
+
+
+def clone_after(anchor, text, template=None):
+    """Neuer Absatz nach `anchor`, Absatz- und Zeichenformat von `template` (Standard: anchor)."""
+    src = template if template is not None else anchor
+    new_p = copy.deepcopy(src._p)
+    for child in list(new_p):
+        if child.tag != qn("w:pPr"):
+            new_p.remove(child)
+    anchor._p.addnext(new_p)
+    np = Paragraph(new_p, anchor._parent)
+    run = np.add_run(text)
+    if src.runs and src.runs[0]._r.rPr is not None:
+        run._r.insert(0, copy.deepcopy(src.runs[0]._r.rPr))
+    return np
+
+
+def is_heading(p):
+    return (p.style is not None and p.style.name.startswith("BEI_BW")) or \
+           (p._p.pPr is not None and p._p.pPr.pStyle is not None and
+            str(p._p.pPr.pStyle.get(qn("w:val"))).startswith("BEIBW"))
+
+
+def clean(items):
+    """Leere Eintraege entfernen, Reihenfolge behalten, Dubletten im selben Block entfernen."""
+    out, seen = [], set()
+    for it in items or []:
+        s = (it or "").strip()
+        if s and s not in seen:
+            out.append(s)
+            seen.add(s)
+    return out
+
+
+def append_block(anchor, items, quote_template):
+    """Haengt Zitate nach `anchor` an. Nutzt einen direkt folgenden leeren Absatz als ersten Platz."""
+    nxt = anchor._p.getnext()
+    slot = None
+    if nxt is not None and nxt.tag == qn("w:p"):
+        cand = Paragraph(nxt, anchor._parent)
+        if not ptext(cand).strip() and not is_heading(cand):
+            slot = cand
+    last = anchor
+    for i, q in enumerate(items):
+        if i == 0 and slot is not None:
+            set_text(slot, q)
+            last = slot
+        else:
+            last = clone_after(last, q, quote_template)
+    return last
+
+
+# ---------------------------------------------------------------- Bloecke
+def fill_tables(doc, data, datum):
+    tables = doc.tables
+    if len(tables) &lt; 2:
+        raise SystemExit("Vorlage unerwartet: weniger als zwei Tabellen gefunden.")
+    for table, key in ((tables[0], "wuensche"), (tables[1], "lebenssituation")):
+        block = data.get(key, {}) or {}
+        value_rows = [r for i, r in enumerate(table.rows) if i % 2 == 1]
+        for row, cell_key in zip(value_rows, CELL_KEYS):
+            cell = row.cells[0]
+            quotes = clean(block.get(cell_key))
+            ps = cell.paragraphs
+            base = ps[0]
+            for p in ps[1:]:          # vorbelegte Hinweis- und Leerabsaetze entfernen
+                p._p.getparent().remove(p._p)
+            if ptext(base).strip() != SIEHE:
+                set_text(base, SIEHE)
+            if quotes:
+                last = clone_after(base, "Ergänzung aus dem Gespräch am %s:" % datum, base)
+                for q in quotes:
+                    last = clone_after(last, q, base)
+
+
+def fill_lebensbereiche(doc, data, datum):
+    lb = data.get("lebensbereiche", {}) or {}
+    paras = doc.paragraphs
+    for n in range(1, 10):
+        idx = next((i for i, p in enumerate(paras)
+                    if is_heading(p) and ptext(p).strip().startswith("Lebensbereich %d" % n)), None)
+        if idx is None:
+            raise SystemExit("Vorlage unerwartet: Ueberschrift Lebensbereich %d fehlt." % n)
+        anchor = paras[idx + 1]
+        if "Aus dem Gespräch am" not in ptext(anchor):
+            raise SystemExit("Vorlage unerwartet: Hinweiszeile nach Lebensbereich %d fehlt." % n)
+        set_text(anchor, "Aus dem Gespräch am %s:" % datum)
+        quotes = clean(lb.get(str(n))) or [KEINE]
+        append_block(anchor, quotes, anchor)
+
+
+def fill_umweltfaktoren(doc, data, datum):
+    uf = data.get("umweltfaktoren", {}) or {}
+    paras = doc.paragraphs
+    anchor = next((p for p in paras if ptext(p).strip().startswith("Aus dem Teilhabebericht vom")), None)
+    if anchor is None:
+        raise SystemExit("Vorlage unerwartet: Zeile 'Aus dem Teilhabebericht vom' fehlt.")
+    bullet_tpl = next((p for p in paras if p._p.pPr is not None and p._p.pPr.numPr is not None), None)
+    d_thb = (data.get("datum_teilhabebericht") or "").strip()
+    if d_thb:
+        set_text(anchor, "Aus dem Teilhabebericht vom %s:" % d_thb)
+    else:
+        set_text(anchor, "Aus dem Gespräch am %s:" % datum)
+    last = anchor
+    for label, key in (("Förderfaktoren:", "foerderfaktoren"), ("Barrieren:", "barrieren")):
+        items = clean(uf.get(key))
+        if not items:
+            continue
+        last = append_block(last, [label], anchor) if last is anchor else clone_after(last, label, anchor)
+        for it in items:
+            last = clone_after(last, it, bullet_tpl if bullet_tpl is not None else anchor)
+
+
+def fill_hinweise(doc, data):
+    items = data.get("ergaenzende_hinweise")
+    if isinstance(items, str):
+        items = [items]
+    items = clean(items)
+    if not items:
+        return
+    paras = doc.paragraphs
+    heading = None
+    for p in paras:
+        if is_heading(p) and ptext(p).strip() == "Ergänzende Hinweise":
+            heading = p
+    if heading is None:
+        raise SystemExit("Vorlage unerwartet: Ueberschrift 'Ergaenzende Hinweise' fehlt.")
+    normal_tpl = next((p for p in paras if ptext(p).strip().startswith("Aus dem Gespräch am")), heading)
+    append_block(heading, items, normal_tpl)
+
+
+def write_protocol(path, data):
+    lines = ["Pruefprotokoll zur Uebertragung (automatisch erzeugt)", ""]
+    lines.append("Person: %s" % data.get("person", ""))
+    lines.append("Gespraech am: %s" % data.get("datum_gespraech", PLACEHOLDER))
+    lines.append("Teilhabebericht vom: %s" % (data.get("datum_teilhabebericht") or "nicht beigefuegt"))
+    lines.append("")
+    lines.append("Nicht zugeordnete Saetze:")
+    lines += ["- " + s for s in clean(data.get("nicht_zugeordnet"))] or ["- keine"]
+    lines.append("")
+    lines.append("Mehrfach zugeordnete Saetze:")
+    lines += ["- " + s for s in clean(data.get("mehrfach_zugeordnet"))] or ["- keine"]
+    lines.append("")
+    lines.append("Bitte pruefen: Ergaenzende Hinweise sind ein Entwurf; Umweltfaktoren ohne Teilhabebericht stammen aus dem Gespraech.")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+
+
+def main(argv):
+    if len(argv) != 4:
+        sys.stderr.write(__doc__)
+        return 1
+    template, mapping, output = argv[1], argv[2], argv[3]
+    with open(mapping, encoding="utf-8") as fh:
+        data = json.load(fh)
+    datum = (data.get("datum_gespraech") or "").strip() or PLACEHOLDER
+    doc = Document(template)
+    fill_tables(doc, data, datum)
+    fill_lebensbereiche(doc, data, datum)
+    fill_umweltfaktoren(doc, data, datum)
+    fill_hinweise(doc, data)
+    doc.save(output)
+    proto = output.rsplit(".", 1)[0] + "_Pruefprotokoll.txt"
+    write_protocol(proto, data)
+    print("Geschrieben: %s" % output)
+    print("Pruefprotokoll: %s" % proto)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
+```
+</pre>
+  </div>
+</section>
+
 <section id="signale">
   <h2>Zuordnung: Welche Aussage in welchen Block gehört</h2>
   <p class="sub">Signalwörter je Block mit einer wörtlichen Fundstelle aus Beispiel 1. Der vollständige Katalog mit allen Fallen steht im Prompt.</p>
@@ -516,12 +840,13 @@ SELBSTPRÜFUNG
 
 <script>
 (function(){
-  var btn=document.getElementById('copyBtn');
-  btn.addEventListener('click',function(){
-    var txt=document.getElementById(btn.dataset.target).textContent;
-    function done(ok){btn.textContent=ok?'Kopiert':'Kopieren fehlgeschlagen, bitte markieren';btn.classList.toggle('done',ok);setTimeout(function(){btn.textContent='Prompt kopieren';btn.classList.remove('done')},2200)}
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){done(true)},function(){done(false)})}
-    else{try{var r=document.createRange();r.selectNodeContents(document.getElementById(btn.dataset.target));var s=window.getSelection();s.removeAllRanges();s.addRange(r);done(document.execCommand('copy'))}catch(e){done(false)}}
+  document.querySelectorAll('button.copy').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var el=document.getElementById(btn.dataset.target), txt=el.textContent;
+      function done(ok){btn.textContent=ok?'Kopiert':'Kopieren fehlgeschlagen, bitte markieren';btn.classList.toggle('done',ok);setTimeout(function(){btn.textContent='Prompt kopieren';btn.classList.remove('done')},2200)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){done(true)},function(){done(false)})}
+      else{try{var r=document.createRange();r.selectNodeContents(el);var s=window.getSelection();s.removeAllRanges();s.addRange(r);done(document.execCommand('copy'))}catch(e){done(false)}}
+    });
   });
 })();
 </script>
