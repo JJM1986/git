@@ -16,7 +16,7 @@ Zielbögen (je ein eigener Prompt):
 
 | Nr. | Bogen | Prompt | Status |
 |---|---|---|---|
-| 1 | BEI_BW A – Basisbogen | [02_prompt_basisbogen.txt](02_prompt_basisbogen.txt) | fertig, getestet an Beispiel 1 |
+| 1 | BEI_BW A – Basisbogen | [02_prompt_basisbogen.txt](02_prompt_basisbogen.txt) · [Seite für die Mitarbeitende](https://claude.ai/artifact/TpZRBTJ2EdCQZ6CVqKPU9L) ([HTML](04_seite_basisbogen_assistent.html)) | fertig, getestet an Beispiel 1 |
 | 2 | BEI_BW B – Gesundheitsbogen | – | nächster Schritt |
 | 3 | GP-Vorbereitung | – | danach (offene Frage, siehe unten) |
 
