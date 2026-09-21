@@ -17,8 +17,9 @@ Zielbögen (je ein eigener Prompt):
 | Nr. | Bogen | Prompt | Status |
 |---|---|---|---|
 | 1 | BEI_BW A – Basisbogen | [02_prompt_basisbogen.txt](02_prompt_basisbogen.txt) · [Seite für die Mitarbeitende](https://claude.ai/artifact/TpZRBTJ2EdCQZ6CVqKPU9L) ([HTML](04_seite_basisbogen_assistent.html)) | fertig, getestet an Beispiel 1 |
-| 2 | BEI_BW B – Gesundheitsbogen | – | nächster Schritt |
-| 3 | GP-Vorbereitung | – | danach (offene Frage, siehe unten) |
+| 2 | BEI_BW C – Erhebungsbogen (Bedarfsermittlung) | [05_prompt_erhebungsbogen_c.txt](05_prompt_erhebungsbogen_c.txt) · [Seite](https://claude.ai/artifact/TKWT9qCYg8JVpRSMVtfWSR) ([HTML](07_seite_erhebungsbogen_assistent.html)) | fertig, getestet an Beispiel 1 |
+| 3 | BEI_BW B – Gesundheitsbogen | – | nächster Schritt |
+| 4 | GP-Vorbereitung | – | danach (offene Frage, siehe unten) |
 
 ## Warum die bisherigen Versuche scheiterten
 
@@ -81,6 +82,24 @@ Jeder Prompt ist gleich aufgebaut:
 6. Liste von oben nach unten in die Word-Vorlage übertragen.
 7. Alle Zeilen mit Status **ABGELEITET** fachlich prüfen, alle **OFFEN** aus der Akte ergänzen.
 
+## Besonderheit Bogen C: Hinweise der Vorlage
+
+Die Vorlage C hat keine Kästchen, nur Text und zwei Tabellen. Deshalb liefert der
+Prompt hier den kompletten Bogentext in Vorlagenreihenfolge, blockweise kopierbar.
+Die Hinweistexte der Vorlage werden so behandelt:
+
+| Hinweis in der Vorlage | Behandlung |
+|---|---|
+| „Siehe Vorbereitungsbogen“ (10 Tabellenzellen) | bleibt als erste Zeile stehen; passt eine Aussage, folgt „Ergänzung aus dem Gespräch am [Datum]:“ mit den Zitaten |
+| „Aus dem Gespräch am XX.XX.XXXX:“ (9 Lebensbereiche) | Datum einsetzen, darunter die Zitate; ohne Zitat „Keine Einschränkungen ersichtlich.“ |
+| „Aus dem Teilhabebericht vom XX.XX.XXXX:“ (Umweltfaktoren) | Datum einsetzen, Stichworte aus dem Teilhabebericht; liegt keiner vor, „Aus dem Gespräch am [Datum]:“ mit Stichworten und Kürzel |
+| Kursive Erklärtexte unter den Überschriften | nicht ausgeben, stehen schon in der Vorlage |
+| „Ergänzende Hinweise“ | Entwurf von drei Sätzen, gekennzeichnet „Entwurf, bitte prüfen“ |
+
+Zusätzlich hat der Prompt eine Abdeckungsprüfung: Er zählt die Protokollzeilen und
+listet nicht zugeordnete und mehrfach zugeordnete Sätze auf. Damit geht kein Satz
+verloren und keiner steht doppelt im selben Block.
+
 ## Testlauf
 
 [03_testlauf_beispiel1_basisbogen.md](03_testlauf_beispiel1_basisbogen.md) enthält
@@ -88,6 +107,11 @@ die Ausfüllliste, die der Prompt für Beispiel 1 liefern muss, und den Abgleich
 dem tatsächlich ausgefüllten Basisbogen. Ergebnis: keine Fehlzuordnung, alle im
 Protokoll enthaltenen Angaben gefunden, alle Fallen (Kinder, körperliche
 Behinderung, Betreuerin) vermieden.
+
+[06_testlauf_beispiel1_erhebungsbogen.md](06_testlauf_beispiel1_erhebungsbogen.md)
+macht dasselbe für Bogen C: Sieben von neun Lebensbereichen sind identisch mit der
+Referenz, die übrigen zwei weichen nur durch eine zusätzliche Zuordnung und durch
+Sätze ab, die im gelieferten Protokoll fehlen. Keine Fehlzuordnung.
 
 ## Offene Punkte für die nächsten Prompts
 

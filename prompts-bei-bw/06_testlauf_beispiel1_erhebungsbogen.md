@@ -1,0 +1,219 @@
+# Testlauf: Prompt Erhebungsbogen C auf Beispiel 1
+
+Der Prompt aus `05_prompt_erhebungsbogen_c.txt` wurde mit dem Gesprächsprotokoll von
+Beispiel 1 durchgeführt. Angaben der Fachkraft für den Lauf: Name Frau Anna Apfelkuchen,
+Gesprächsdatum unbekannt (bleibt XX.XX.XXXX), Teilhabebericht nicht beigefügt, Kürzel
+wie im Basisbogen-Testlauf (FS Pflegemutter, FF Begleitung, FD Fachdienst Werkstatt,
+SD Sozialer Dienst).
+
+## 1. Soll-Ausgabe der KI
+
+```text
+BEI_BW C – ERHEBUNGSBOGEN – ÜBERTRAGUNG AUS DEM GESPRÄCH AM XX.XX.XXXX
+
+WÜNSCHE UND LEBENSVORSTELLUNGEN
+Wie und wo ich wohnen will
+Siehe Vorbereitungsbogen
+Was ich arbeiten oder lernen will
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+FS: Anna Apfelkuchen hat das Fernziel auf dem ersten Arbeitsmarkt zu arbeiten, z.B. im Getränkemarkt oder sonst einer Firma in Wurzach. Sie wünscht sich den Kontakt zur Außenwelt.
+Wie ich meine Beziehungen zu anderen Menschen gestalten will
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+FD: Der Kontakt mit anderen ist lustig und freundlich. Es braucht aber bisher noch Impulse von außen. Wir haben den Wunsch unsererseits, dass sie noch mehr in Kontakt mit anderen kommt und sich noch mehr zugehörig fühlt.
+FF: Dann kann sie auch mehr mit Gleichaltrigen in Kontakt kommen.
+Was ich sonst mit meiner verfügbaren Zeit machen will
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+FS: Nächstes Jahr greifen wir voll an mit Freizeitaktivitäten.
+Was mir sonst noch wichtig ist
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+FS: Jetzt ist es wichtig die OP gut vorzubereiten und so fit wie möglich da rein zu gehen. Danach müssen wir dann halt einfach mal schauen, wie´s Weitergeht.
+
+AKTUELLE LEBENSSITUATION UND PERSONENBEZOGENE FAKTOREN
+Wie und wo ich jetzt wohne
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+Ich wohne mit der Familie im gleichen Haus, habe aber einen abgetrennten Wohnbereich.
+Was ich derzeit arbeite oder lerne
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+Ich war in Reha, davor war ich auf dem Reiterhof. Danach bin ich hierhergekommen (Liebenau). Es hat sich ganz gut entwickelt.
+Ich bin im Innenbereich und arbeite gerne mit Fahrradtaschen.
+Wie jetzt meine Beziehungen zu anderen Menschen sind
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+Ich fühle mich wohl, es ist okay.  Ich verstehe mich mit Alexa ganz gut, haben letztens mal zusammengearbeitet.
+Was ich sonst mit meiner verfügbaren Zeit mache
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+In der Pause höre ich Musik
+Was mir sonst noch wichtig ist
+Siehe Vorbereitungsbogen
+
+LEBENSBEREICHE UND UMWELTFAKTOREN (ICF UND ICF-CY)
+Lebensbereich 1 – Lernen und Wissensanwendung
+Aus dem Gespräch am XX.XX.XXXX:
+FS: Das Fahrrad hat sie seit letztes Jahr August/September, da war sie aber noch nicht so motiviert. Das hat dann erst Anfang diesen Jahres angefangen.
+Lebensbereich 2 – Allgemeine Aufgaben und Anforderungen
+Aus dem Gespräch am XX.XX.XXXX:
+Halb 9 fange ich an, um 10 hab ich Pause, dann arbeite ich nochmal 10-11:45. Wie es ist mit der längeren Konzentration ist noch fraglich, weil der Tag noch nicht so lange ist.
+FS: Der Mittlere ist im Sprachheilkindergarten, sie fährt mit dem Fahrdienst. Meine kleine Tochter ist Montag mittags im Kindi und meine große Tochter fährt mit dem Bus zur Schule, dann hat sie Klavier. In der Zeit gehe ich mit Anna Apfelkuchen einkaufen.
+Ich arbeite Dienstag im Küchenteam für die Kaffeepause. Ich bereite Kaffee vor, helfe nach der Pause beim Aufräumen und Tische putzen.
+FD: Alle müssen da helfen.
+Lebensbereich 3 – Kommunikation
+Aus dem Gespräch am XX.XX.XXXX:
+Keine Einschränkungen ersichtlich.
+Lebensbereich 4 – Mobilität
+Aus dem Gespräch am XX.XX.XXXX:
+FS: es sind 5KM bis zur Bushaltestelle in Bad Wurzach. Wir wohnen sehr außerhalb. Ich habe deshalb jetzt lange für eine Bushaltestelle bei uns gekämpft, die bekommen wir jetzt ab September.
+Ich fahre mit dem Fahrrad nach Wurzach zur Arbeit. Hier her fahre ich mit dem Bus.
+FS: Das Fahrrad hat sie seit letztes Jahr August/September, da war sie aber noch nicht so motiviert. Das hat dann erst Anfang diesen Jahres angefangen.
+FF: Anna Apfelkuchen muss eine Treppe im Haus steigen.
+FS: Im Winter ist Anna Apfelkuchen nicht mobil, wir haben immer viel Schnee, sodass ich sie fahren muss. Ab September haben wir einen Bus, der fährt auch 2x mittags.
+Lebensbereich 5 – Selbstversorgung
+Aus dem Gespräch am XX.XX.XXXX:
+FS: Wir waren dann viel bei Ärzten und haben es auf den konventionellen Weg mit einer Reha versucht. Das hat nur mäßig Erfolge gebracht. Jetzt haben wir einen OP-Vorbesprechungstermin in Biberach. Ggf. machen wir auch nochmal ein MRT.
+FF: Die ärztliche Begleitung teilen wir uns, wir sind viel im Austausch. Anna Apfelkuchen macht den ein oder anderen Termin auch selber.
+FS: Jetzt haben wir noch einen letzten Arztwechsel, dann haben wir alle Ärzte hier in der Region.
+FS: Jetzt ist es wichtig die OP gut vorzubereiten und so fit wie möglich da rein zu gehen. Danach müssen wir dann halt einfach mal schauen, wie´s Weitergeht.
+Lebensbereich 6 – Häusliches Leben
+Aus dem Gespräch am XX.XX.XXXX:
+FS: 1x/Woche gehen wir zusammen einkaufen.
+Wäsche waschen, putzen und so weiter mache ich alles selber.
+Essen tu ich mit der Familie, Frühstücken tu ich allein. Kochen tu ich nicht, das mag ich nicht und kann ich auch nicht. Ich habe kein Interesse das zu lernen.
+FS: Wenn niemand da ist, gibt es Fertigsuppe.
+FS: Wir gehen 1x/Woche zusammen einkaufen, beim Kochen sitzt sie dann einfach dabei und schaut zu und wir quatschen über den Herd. Sie muss nicht helfen, wenn sie nicht will.
+Beim Backen bin ich dabei.
+Lebensbereich 7 – Interpersonelle Interaktionen und Beziehungen
+Aus dem Gespräch am XX.XX.XXXX:
+FD: Der Kontakt mit anderen ist lustig und freundlich. Es braucht aber bisher noch Impulse von außen. Wir haben den Wunsch unsererseits, dass sie noch mehr in Kontakt mit anderen kommt und sich noch mehr zugehörig fühlt.
+Ich fühle mich wohl, es ist okay.  Ich verstehe mich mit Alexa ganz gut, haben letztens mal zusammengearbeitet.
+FS: Es gab jetzt ein Betreuerinnenwechsel. Zu Frau Koch hatte sie einen engen Kontakt, mit Frau Holzmann jetzt klappt die Organisation gut, sie haben aber keinen so engen Kontakt.
+Lebensbereich 8 – Bedeutende Lebensbereiche
+Aus dem Gespräch am XX.XX.XXXX:
+FS: Es ist besser als erwartet. Sie hatte einen dreifachen Bandscheibenvorfall, das hat sie bei der Arbeit auf dem Hof körperlich stark beeinflusst.
+FD: Anna Apfelkuchen musste erstmal ankommen in der Werkstatt, jetzt kommt sie einfach, das klappt besser als ich dachte. Es ist eine Motivation hier zu sein zu merken.
+SD: Was sind die Aufgaben in der Werkstatt?
+Ich bin im Innenbereich und arbeite gerne mit Fahrradtaschen.
+FD: Wir haben ein offenes Konzept mit mehreren Arbeitsbereichen: Holzbereich, Grünland, Herle Brauerei, Innenbereich. Die Beschäftigten wechseln die Plätze. So soll mehr Förderung passieren. Wir haben immer verschiedene Aufträge, meistens haben wir 3-4 Aufträge gleichzeitig in der Bearbeitung. Man kann immer aussuchen, was man machen will, das fällt die aber noch schwer. Ich will dir nichts aufdrücken, du sollst aber auch die Chance zur Abwechslung nutzen.
+FD: Du kannst viel gut, arbeitest genau und gewissenhaft.
+FS: Im Dezember hast du hier angefangen.
+Ich arbeite Dienstag im Küchenteam für die Kaffeepause. Ich bereite Kaffee vor, helfe nach der Pause beim Aufräumen und Tische putzen.
+FD: Alle müssen da helfen.
+FS: 2 Stunden am Stück sitzen ist schwierig, nur stehen ist auch schwierig, am besten abwechselnd. Sie ist jetzt konsequent dabei Gewicht zu verlieren. Vielleicht wäre der Außenbereich auch mal was zum Kennenlernen. Es ist wichtig eine Balance zu finden zwischen gut und zu viel. Z.B. 1x/Woche in den Außenbereich.
+FS: Anna Apfelkuchen hat das Fernziel auf dem ersten Arbeitsmarkt zu arbeiten, z.B. im Getränkemarkt oder sonst einer Firma in Wurzach. Sie wünscht sich den Kontakt zur Außenwelt.
+FS: Es gab jetzt ein Betreuerinnenwechsel. Zu Frau Koch hatte sie einen engen Kontakt, mit Frau Holzmann jetzt klappt die Organisation gut, sie haben aber keinen so engen Kontakt.
+Lebensbereich 9 – Gemeinschafts-, soziales und staatsbürgerliches Leben
+Aus dem Gespräch am XX.XX.XXXX:
+FS: Anna Apfelkuchen war sehr fit die letzten Monate, sie ist viel Fahrrad gefahren.
+In der Pause höre ich Musik
+FS: Anna Apfelkuchen macht gerne Pailettenbilder, früher hat sie mehr gepuzzelt, jetzt sind es eher die Glitzersteine.
+FF: Das ist jetzt grade halt auch von der Krankheit überlagert.
+FF: Anna Apfelkuchen geht aber dieses Jahr auch noch in den Urlaub, auf eine Freizeit in Italien mit der Werkstatt, das ist ein großer Fortschritt.
+FF: Es gibt auch Angebote von Aktion Mensch, da ist sie bisher aber nicht so offen, es geht viel um ihre Krankheit und sich auf die Menschen mit Behinderung und die Infrastruktur einzulassen.
+FS: sie spielt gerne mit meinen 3 Kindern, das macht sie gern, da ist sie manchmal ganz schön eingespannt.
+FS: Manchmal muss man sie aus der Reserve locken, auf den Urlaub z.B. freut sie sich, da ist sie sehr happy.
+Im Oktober ist der Urlaub, 5 Tage, 4 Nächte.
+FS: Dann haben wir Anfang September noch ein Konzert, da hat sie ein Ticket für Mathias Reim zu Weihnachten bekommen.
+Da kann ich alle Lieder auswendig.
+FS: Nächstes Jahr greifen wir voll an mit Freizeitaktivitäten.
+FF: Dann kann sie auch mehr mit Gleichaltrigen in Kontakt kommen.
+
+Übersicht Umweltfaktoren
+Aus dem Gespräch am XX.XX.XXXX:
+Förderfaktoren:
+- Pflegefamilie im gleichen Haus: gemeinsames Einkaufen, Fahrten im Winter, geteilte ärztliche Begleitung (FS, FF)
+- Werkstatt mit offenem Konzept und Wechsel der Arbeitsbereiche, Fachdienst bietet Abwechslung an (FD)
+- Fahrrad als eigenes Verkehrsmittel seit Anfang des Jahres (FS, Person)
+- Neue Bushaltestelle am Wohnort ab September, Bus auch mittags (FS)
+- Freizeitangebote: Werkstattfreizeit in Italien, Angebote von Aktion Mensch, Konzert (FF, FS)
+Barrieren:
+- Sehr ländliche Wohnlage, 5 km bis zur Bushaltestelle, im Winter nicht mobil (FS)
+- Dreifacher Bandscheibenvorfall, OP steht aus, längeres Sitzen und Stehen schwierig (FS)
+- Treppe im Haus (FF)
+- Betreuerinnenwechsel, weniger enger Kontakt zur neuen Betreuerin (FS)
+- Auswahl aus mehreren Aufgaben fällt noch schwer (FD)
+
+ERGÄNZENDE HINWEISE
+Entwurf, bitte prüfen: Frau Anna Apfelkuchen arbeitet seit Dezember im Innenbereich der Werkstatt der Liebenau und ist dort nach Angaben des Fachdienstes angekommen. Im Vordergrund steht derzeit die Vorbereitung einer Operation nach einem dreifachen Bandscheibenvorfall; wie es danach weitergeht, ist offen. Als Fernziel wurde eine Tätigkeit auf dem ersten Arbeitsmarkt genannt.
+
+ABDECKUNGSPRÜFUNG
+Protokollzeilen gesamt: 45
+Davon mindestens einmal zugeordnet: 45
+Nicht zugeordnete Sätze (wörtlich, mit Kürzel; sonst „keine“):
+- keine
+Mehrfach zugeordnete Sätze (Kurzform, mit Blöcken):
+- FS: Das Fahrrad hat sie seit … → LB 1, LB 4
+- Ich arbeite Dienstag im Küchenteam … → LB 2, LB 8
+- FD: Alle müssen da helfen. → LB 2, LB 8
+- FS: Es gab jetzt ein Betreuerinnenwechsel … → LB 7, LB 8
+- FD: Der Kontakt mit anderen ist lustig … → LB 7, Wünsche Beziehungen
+- FS: Anna Apfelkuchen hat das Fernziel … → LB 8, Wünsche Arbeiten
+- FS: Nächstes Jahr greifen wir voll an … → LB 9, Wünsche Zeit
+- FF: Dann kann sie auch mehr mit Gleichaltrigen … → LB 9, Wünsche Beziehungen
+- FS: Jetzt ist es wichtig die OP gut vorzubereiten … → LB 5, Wünsche Sonstiges
+- Ich bin im Innenbereich … → LB 8, Lebenssituation Arbeiten
+- Ich fühle mich wohl … → LB 7, Lebenssituation Beziehungen
+- In der Pause höre ich Musik → LB 9, Lebenssituation Zeit
+
+SELBSTPRÜFUNG
+1 Alle Überschriften der Vorlage in der richtigen Reihenfolge ausgegeben? ja
+2 Jedes Zitat buchstabengetreu, mit Kürzel, ohne Umformulierung? ja
+3 Jeder inhaltstragende Satz des Protokolls mindestens einmal enthalten? ja
+4 Kein Satz mehr als zweimal in den Lebensbereichen, kein Satz doppelt im selben Block? ja
+5 „Siehe Vorbereitungsbogen“ in allen zehn Tabellenzellen als erste Zeile? ja
+6 Umweltfaktoren und Ergänzende Hinweise enthalten nur, was im Protokoll steht? ja
+```
+
+## 2. Abgleich mit dem ausgefüllten Erhebungsbogen von Beispiel 1
+
+Referenz ist der von der Fachkraft ausgefüllte Bogen C. Er enthält drei Aussagen, die im
+gelieferten Protokoll nicht vorkommen („Kann ich mir vorstellen das mal auszuprobieren.“,
+„FD: Montags haben wir auch noch eine ABM Wlaking …“ bis „Ich überlegs mir.“). Die KI kann
+sie nicht liefern; das Protokoll war offenbar nicht vollständig.
+
+| Block | Referenz | Prompt-Ergebnis | Bewertung |
+|---|---|---|---|
+| Wünsche (5 Zellen) | überall nur „Siehe Vorbereitungsbogen“ | 4 Ergänzungen mit Wunsch-Aussagen (Fernziel, Kontakt, Freizeit, OP) | Mehrwert, optional. Fachkraft kann Ergänzungen streichen |
+| Lebenssituation Wohnen | Ergänzung „Ich wohne mit der Familie …“ | identisch | Treffer |
+| Lebenssituation Arbeiten | nur „Siehe Vorbereitungsbogen“ | Reha/Reiterhof-Satz und „Ich bin im Innenbereich …“ | Abweichung: Referenz hatte den Reha-Satz unter „Zeit“ |
+| Lebenssituation Beziehungen | nur „Siehe Vorbereitungsbogen“ | „Ich fühle mich wohl … Alexa“ | Mehrwert, optional |
+| Lebenssituation Zeit | Reha/Reiterhof-Satz | „In der Pause höre ich Musik“ | Abweichung, beide vertretbar |
+| LB 1 | Fahrrad-Motivation | identisch | Treffer |
+| LB 2 | 4 Zitate (Kindergarten-Zeitfenster, Küchenteam, Alle müssen helfen, Arbeitszeiten) | dieselben 4, in Protokollreihenfolge | Treffer |
+| LB 3 | „Keine Einschränkungen ersichtlich.“ | identisch | Treffer |
+| LB 4 | 5 Zitate | dieselben 5 | Treffer |
+| LB 5 | 4 Zitate | dieselben 4 | Treffer |
+| LB 6 | 6 Zitate | dieselben 6 | Treffer |
+| LB 7 | 2 Zitate | dieselben 2 plus Betreuerinnenwechsel | Abweichung: Prompt ordnet Beziehung zur Betreuerin zusätzlich LB 7 zu |
+| LB 8 | 15 Einträge, darunter Küchenteam-Satz doppelt und 4 Sätze außerhalb des Protokolls | 12 Einträge, jeder Satz einmal | Treffer für alle im Protokoll enthaltenen Sätze |
+| LB 9 | 13 Zitate | dieselben 13 | Treffer |
+| Umweltfaktoren | aus Teilhabebericht vom 13.02.26, 3 Förderfaktoren, 2 Barrieren | aus dem Gespräch, 5 und 5, jeweils mit Kürzel | erwartete Abweichung: Teilhabebericht lag dem Lauf nicht vor. Inhaltlich deckt der Prompt die Referenzpunkte ab (Pflegefamilie, Bandscheibenvorfall, ländliche Lage) |
+| Ergänzende Hinweise | 2 Sätze der Fachkraft (primäres Thema Gesundheit, Regeneration nach OP) | 3 Sätze Entwurf, gekennzeichnet | vergleichbar, Fachkraft überarbeitet |
+
+Zusammenfassung der neun Lebensbereiche:
+
+| Bewertung | Anzahl Lebensbereiche |
+|---|---|
+| identisch mit Referenz | 7 (LB 1, 2, 3, 4, 5, 6, 9) |
+| identisch plus eine zusätzliche Zuordnung | 1 (LB 7) |
+| identisch bis auf Sätze, die im Protokoll fehlen | 1 (LB 8) |
+| Fehlzuordnung | 0 |
+
+## 3. Was der Testlauf zeigt
+
+- **Die Lebensbereiche sind das Kernstück und werden korrekt getroffen.** Alle Sätze des
+  Protokolls landen im selben Lebensbereich wie bei der Fachkraft. Das liegt an den
+  Signalwörtern und den Fallen im Zuordnungskatalog (Gesundheit im Arbeitskontext →
+  LB 8, Fahrrad als Freizeit → LB 9, Zeitfenster der Pflegefamilie → LB 2).
+- **Die Wünsche-Tabelle füllt der Prompt stärker als die Referenz.** Die Fachkraft hat
+  sich dort auf den Vorbereitungsbogen verlassen. Wer das so beibehalten will, streicht
+  Regel 7 „WÜNSCHE“ aus dem Prompt oder löscht die Ergänzungen beim Übertragen.
+- **Die Abdeckungsprüfung verhindert Verluste.** Jeder Satz ist nachweisbar mindestens
+  einmal enthalten; der doppelte Küchenteam-Eintrag der Referenz kann so nicht entstehen.
+- **Was die KI nicht kann:** Sätze ergänzen, die nicht im Protokoll stehen, und den
+  Teilhabebericht ersetzen. Fehlt er, sind die Umweltfaktoren als „aus dem Gespräch“
+  gekennzeichnet und müssen mit dem Bericht abgeglichen werden.

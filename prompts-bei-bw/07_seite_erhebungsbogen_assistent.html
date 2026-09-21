@@ -1,0 +1,527 @@
+<title>Erhebungsbogen Übertragung</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#EEF1F4; --surface:#FFFFFF; --surface-2:#F6F8FA; --line:#D5DBE1; --ink:#1A222C; --muted:#5A6672;
+  --accent:#0F6C72; --accent-ink:#FFFFFF; --accent-soft:#DDEFF0;
+  --ok:#2A7A4B; --ok-soft:#E1F2E7; --warn:#9A5B00; --warn-soft:#FBEBD0; --open:#5F6B78; --open-soft:#E6EAEE;
+  --code:#F3F5F7; --shadow:0 1px 2px rgba(20,30,40,.06);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0F1418; --surface:#171E25; --surface-2:#1E262E; --line:#2C3640; --ink:#E7ECF0; --muted:#9AA7B3;
+  --accent:#57B8BD; --accent-ink:#0B1416; --accent-soft:#143538;
+  --ok:#6CC894; --ok-soft:#173A27; --warn:#F0B35C; --warn-soft:#3E2C0E; --open:#A9B4BF; --open-soft:#28313A;
+  --code:#111820; --shadow:none;
+}}
+:root[data-theme="dark"]{
+  --ground:#0F1418; --surface:#171E25; --surface-2:#1E262E; --line:#2C3640; --ink:#E7ECF0; --muted:#9AA7B3;
+  --accent:#57B8BD; --accent-ink:#0B1416; --accent-soft:#143538;
+  --ok:#6CC894; --ok-soft:#173A27; --warn:#F0B35C; --warn-soft:#3E2C0E; --open:#A9B4BF; --open-soft:#28313A;
+  --code:#111820; --shadow:none;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.55;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:1040px;margin:0 auto}
+header.top{padding-block:36px 20px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 10px}
+h1{font-family:"Source Serif 4",Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(28px,4vw,40px);line-height:1.12;margin:0 0 12px;text-wrap:balance}
+.lede{max-width:64ch;color:var(--muted);margin:0;font-size:16px}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);background:var(--ground);z-index:5;display:flex;gap:6px;flex-wrap:wrap;padding-block:12px;border-bottom:1px solid var(--line);margin-bottom:28px}
+nav.tabs a{text-decoration:none;color:var(--ink);font-weight:500;font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+nav.tabs a:hover,nav.tabs a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{margin-bottom:44px;scroll-margin-top:72px}
+h2{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:24px;margin:0 0 6px;text-wrap:balance}
+h3{font-size:15px;font-weight:600;margin:22px 0 8px;letter-spacing:.01em}
+.sub{color:var(--muted);margin:0 0 18px;max-width:70ch}
+p{max-width:70ch}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow)}
+.panel h3{margin-top:0}
+ol.steps{margin:0;padding-left:0;list-style:none;counter-reset:s;display:grid;gap:10px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+ol.steps li::before{content:counter(s);font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:13px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+ol.steps li strong{display:block;font-weight:600}
+.causes{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cause{border-left:3px solid var(--warn);padding:2px 0 2px 14px}
+.cause strong{display:block;font-weight:600}
+.cause span{color:var(--muted);font-size:14px}
+.chip{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:500;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.open{background:var(--open-soft);color:var(--open)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 14px;font-size:14px;color:var(--muted)}
+.promptbox{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.promptbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.promptbar .meta{font-size:13px;color:var(--muted)}
+button.copy{font:inherit;font-weight:600;font-size:14px;color:var(--accent-ink);background:var(--accent);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+button.copy:hover{filter:brightness(1.05)} button.copy:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+button.copy.done{background:var(--ok)}
+pre{margin:0;font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.5;background:var(--code);color:var(--ink);padding:16px 18px;overflow:auto;max-height:70vh;white-space:pre-wrap;overflow-wrap:anywhere}
+pre.soll{max-height:none}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td q{quotes:"„" "“"} td q::before{content:open-quote} td q::after{content:close-quote}
+td.f{font-weight:600;white-space:nowrap}
+.stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:18px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat b{display:block;font-family:"Source Serif 4",Georgia,serif;font-size:30px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.stat span{font-size:13px;color:var(--muted)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-top:14px}
+summary{cursor:pointer;padding:12px 16px;font-weight:600}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+details pre{border-top:1px solid var(--line)}
+.note{background:var(--accent-soft);border-radius:10px;padding:12px 16px;color:var(--ink);font-size:14px;max-width:none}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:no-preference){button.copy{transition:background .2s}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">BEI_BW 2024 · Bogen C · Prompt 2 von 4</p>
+  <h1>Erhebungsbogen Übertragung</h1>
+  <p class="lede">Ein Prompt für Nele, der ein Gesprächsprotokoll wortwörtlich in den Erhebungsbogen C überträgt: Wünsche, Lebenssituation, die neun Lebensbereiche, Umweltfaktoren. Die Hinweise der Vorlage bleiben als Gerüst und werden um die Zitate ergänzt.</p>
+</header>
+
+<nav class="tabs" aria-label="Abschnitte">
+  <a href="#ablauf">Ablauf</a>
+  <a href="#prompt">Prompt kopieren</a>
+  <a href="#signale">Zuordnung</a>
+  <a href="#test">Testlauf Beispiel 1</a>
+</nav>
+
+<section id="ablauf">
+  <h2>Was der Prompt mit den Hinweisen der Vorlage macht</h2>
+  <p class="sub">Bogen C hat keine Kästchen, nur Text und zwei Tabellen. Deshalb liefert die KI hier den kompletten Bogentext in Vorlagenreihenfolge, blockweise kopierbar. Die Hinweistexte bleiben stehen und werden ergänzt.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Hinweis in der Vorlage</th><th>Behandlung durch den Prompt</th></tr></thead>
+    <tbody>
+      <tr><td class="f">„Siehe Vorbereitungsbogen“</td><td>bleibt in allen zehn Tabellenzellen als erste Zeile. Passt eine Aussage, folgt „Ergänzung aus dem Gespräch am [Datum]:“ und darunter die Zitate. Passt keine, bleibt nur der Hinweis.</td></tr>
+      <tr><td class="f">„Aus dem Gespräch am XX.XX.XXXX:“</td><td>Datum wird eingesetzt, darunter die Zitate in Protokollreihenfolge, jedes in einer Zeile. Ohne Zitat: „Keine Einschränkungen ersichtlich.“</td></tr>
+      <tr><td class="f">„Aus dem Teilhabebericht vom XX.XX.XXXX:“</td><td>Datum wird eingesetzt, Stichworte aus dem Teilhabebericht. Liegt keiner vor, steht „Aus dem Gespräch am [Datum]:“ und jedes Stichwort trägt das Kürzel des Sprechers.</td></tr>
+      <tr><td class="f">Kursive Erklärtexte</td><td>werden nicht ausgegeben, sie stehen schon in der Vorlage.</td></tr>
+      <tr><td class="f">„Ergänzende Hinweise“</td><td>Entwurf von höchstens drei Sätzen, gekennzeichnet „Entwurf, bitte prüfen“, nur mit Inhalten aus dem Protokoll.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Vier Regeln gegen falsche Zuordnung</h3>
+  <div class="causes">
+    <div class="cause"><strong>Der Satz ist die Einheit</strong><span>Eine Protokollzeile darf satzweise auf Blöcke verteilt werden. Folgebemerkungen bleiben beim Bezugssatz.</span></div>
+    <div class="cause"><strong>Höchstens zwei Lebensbereiche</strong><span>Ein Satz steht in maximal zwei Lebensbereichen, Hauptbereich zuerst. Nie doppelt im selben Block.</span></div>
+    <div class="cause"><strong>Vollständigkeit wird gezählt</strong><span>Die Abdeckungsprüfung am Ende listet jeden nicht zugeordneten und jeden mehrfach zugeordneten Satz.</span></div>
+    <div class="cause"><strong>Signalwörter statt Ähnlichkeit</strong><span>Jeder Lebensbereich hat eine Wortliste und benannte Fallen, etwa: Gesundheit im Arbeitskontext ist LB 8, ärztliche Behandlung LB 5.</span></div>
+  </div>
+
+  <h3>So wird der Prompt benutzt</h3>
+  <ol class="steps">
+    <li><div><strong>Prompt kopieren</strong>Unten auf „Prompt kopieren“ klicken und in Nele einfügen.</div></li>
+    <li><div><strong>Angaben oben ausfüllen</strong>Name der Person, Gesprächsdatum, Datum des Teilhabeberichts und die Kürzel-Legende.</div></li>
+    <li><div><strong>Protokoll einfügen</strong>Text des Gesprächsprotokolls zwischen <code>=== QUELLE 1 ===</code> und <code>=== ENDE QUELLE 1 ===</code> einsetzen.</div></li>
+    <li><div><strong>Teilhabebericht einfügen</strong>Optional, für den Block Umweltfaktoren, zwischen <code>=== QUELLE 2 ===</code> und <code>=== ENDE QUELLE 2 ===</code>.</div></li>
+    <li><div><strong>Abschicken und übertragen</strong>Die Antwort ist ein Codeblock in Vorlagenreihenfolge. Block für Block in die Word-Vorlage kopieren.</div></li>
+    <li><div><strong>Prüfen</strong>Abdeckungsprüfung lesen, Umweltfaktoren mit dem Teilhabebericht abgleichen, Entwurf der Ergänzenden Hinweise überarbeiten.</div></li>
+  </ol>
+</section>
+
+<section id="prompt">
+  <h2>Der Prompt für den Erhebungsbogen</h2>
+  <p class="sub">Vollständiger Text mit Grundregeln, Zuordnungskatalog für alle Blöcke, festem Ausgabeformat, Abdeckungsprüfung und Selbstprüfung. Platzhalter in eckigen Klammern werden pro Fall ausgefüllt.</p>
+  <div class="promptbox">
+    <div class="promptbar">
+      <span class="meta">Version 1 · getestet an Beispiel 1 · ca. 1.700 Wörter</span>
+      <button class="copy" id="copyBtn" type="button" data-target="promptText">Prompt kopieren</button>
+    </div>
+    <pre id="promptText">Du bist Assistenz für die Bedarfsermittlung nach BEI_BW (Baden-Württemberg, Stand 2024) beim Sozialen Dienst eines Landratsamts. Deine Aufgabe: Du überträgst das unten eingefügte Gesprächsprotokoll in den Bogen „C – Erhebungsbogen“ (Bedarfsermittlung). Du ordnest jede Aussage des Protokolls dem passenden Block der Vorlage zu und übernimmst sie wortwörtlich. Du fasst nicht zusammen, du formulierst nicht um, du erfindest nichts.
+
+ANGABEN DER FACHKRAFT (vor dem Absenden ausfüllen)
+- Name der leistungsberechtigten Person: [NAME EINTRAGEN]
+- Datum des Gesprächs: [TT.MM.JJJJ EINTRAGEN]
+- Datum des letzten Teilhabeberichts: [TT.MM.JJJJ EINTRAGEN oder „liegt nicht vor“]
+- Sprecherkürzel im Protokoll:
+  ohne Kürzel / Ich-Form = die leistungsberechtigte Person
+  FS = [FUNKTION EINTRAGEN, z. B. Pflegemutter]
+  FF = [FUNKTION EINTRAGEN]
+  FD = [FUNKTION EINTRAGEN, z. B. Fachdienst der Werkstatt]
+  SD = [FUNKTION EINTRAGEN, z. B. Sozialer Dienst Landratsamt]
+
+QUELLEN
+Quelle 1 = Gesprächsprotokoll (Pflicht). Einzige Quelle für Zitate.
+Quelle 2 = Teilhabebericht (optional). Wird nur für den Block „Übersicht Umweltfaktoren“ verwendet.
+Der Vorbereitungsbogen ist eine eigene Quelle, die dir nicht vorliegt. Deshalb bleibt der Hinweis „Siehe Vorbereitungsbogen“ überall stehen.
+
+GRUNDREGELN
+1. Wortwörtlich. Jeder Satz wird buchstabengetreu übernommen, mit Rechtschreibung, Zeichensetzung und Tippfehlern des Originals. Aussagen mit Kürzel behalten ihr Kürzel („FS: …“). Aussagen der Person ohne Kürzel bleiben ohne Kürzel in der Ich-Form.
+2. Der Satz ist die Einheit. Eine Protokollzeile darf satzweise auf verschiedene Blöcke verteilt werden, wenn die Sätze eindeutig verschiedene Blöcke betreffen. Sonst bleibt die Zeile zusammen. Eine Folgebemerkung, die sich auf den vorherigen Satz bezieht („Das ist jetzt grade halt auch von der Krankheit überlagert.“), bleibt beim Bezugssatz.
+3. Vollständigkeit. Jeder inhaltstragende Satz des Protokolls erscheint mindestens einmal im Bogen. Fragen der Fachkraft (SD) werden übernommen, wenn sie eine Antwort einleiten. Nichts wird weggelassen, nichts hinzugefügt.
+4. Reihenfolge. Innerhalb eines Blocks stehen die Zitate in der Reihenfolge des Protokolls, jedes Zitat in einer eigenen Zeile. Kein Zitat steht zweimal im selben Block.
+5. Mehrfachzuordnung. Ein Satz darf in höchstens zwei Lebensbereichen stehen, wenn er zwei Bereiche betrifft. Der Hauptbereich zuerst. Zusätzlich darf derselbe Satz in „Wünsche“ oder „Lebenssituation“ stehen; das zählt nicht zur Grenze.
+6. Hinweise der Vorlage:
+   - „Siehe Vorbereitungsbogen“ bleibt in jeder Tabellenzelle als erste Zeile. Passt eine Aussage aus dem Gespräch, folgt darunter die Zeile „Ergänzung aus dem Gespräch am [DATUM]:“ und danach die Zitate. Passt keine, steht nur „Siehe Vorbereitungsbogen“.
+   - „Aus dem Gespräch am XX.XX.XXXX:“ wird mit dem Gesprächsdatum ausgefüllt und bleibt die erste Zeile jedes Lebensbereichs.
+   - Gibt es für einen Lebensbereich kein Zitat, steht darunter genau: Keine Einschränkungen ersichtlich.
+   - „Aus dem Teilhabebericht vom XX.XX.XXXX:“ wird mit dem Datum des Teilhabeberichts ausgefüllt. Liegt keiner vor, steht stattdessen „Aus dem Gespräch am [DATUM]:“.
+   - Die kursiven Erklärtexte der Vorlage („Was ich mir wünsche. Was so bleiben soll …“) gibst du nicht aus. Sie stehen schon in der Vorlage.
+7. Drei Arten von Blöcken:
+   WÜNSCHE = Aussagen über Zukunft und Wollen. Signalwörter: wünscht sich, möchte, will, Fernziel, Ziel, „kann ich mir vorstellen“, „überleg’s mir“, nächstes Jahr, soll so bleiben, soll anders werden, „wir haben den Wunsch“. Auch Wünsche anderer Sprecher werden übernommen, mit Kürzel.
+   LEBENSSITUATION = Ich-Aussagen der Person ohne Kürzel, die ihre jetzige Situation als Ganzes beschreiben (wo und wie ich wohne, was ich derzeit tue, wie meine Beziehungen jetzt sind, was ich in meiner Zeit mache). Höchstens drei Sätze je Zelle. Einzelheiten zu Können, Hilfe und Hindernissen gehören in die Lebensbereiche.
+   LEBENSBEREICHE 1 bis 9 = alles, was beschreibt, was gelingt, was nicht gelingt, wer oder was hilft, wer oder was hindert. Hier landet der größte Teil des Protokolls.
+8. Umweltfaktoren. Der einzige Block in Stichworten statt Zitaten. Förderfaktoren = Personen, Dinge, Regelungen, Angebote, die helfen. Barrieren = was hindert. Hinter jedem Stichwort in Klammern das Kürzel des Sprechers, auf dessen Aussage es beruht. Keine Bewertung, keine Prognose, die nicht im Protokoll steht.
+9. Ergänzende Hinweise. Entwurf von höchstens drei Sätzen in der dritten Person („Frau/Herr [NAME]“), nur mit Inhalten aus dem Protokoll, beginnend mit „Entwurf, bitte prüfen:“. Kein Fachurteil, keine Diagnose, keine Empfehlung, die nicht im Protokoll steht.
+10. Ausgabe exakt im vorgegebenen Format in einem einzigen Codeblock. Überschriften wortgleich mit der Vorlage. Kein Text vor oder nach dem Codeblock. Keine Tabellen, keine Fettschrift, keine Aufzählungszeichen außer im Block Umweltfaktoren.
+
+ZUORDNUNGSKATALOG mit Signalwörtern und Fallen
+Wünsche und Lebensvorstellungen
+- Wie und wo ich wohnen will: umziehen, eigene Wohnung, „so wohnen bleiben“, ausziehen, Wohnform.
+- Was ich arbeiten oder lernen will: Fernziel, erster Arbeitsmarkt, Minijob, Praktikum, „ausprobieren“, „kennenlernen“, anderer Arbeitsbereich, Kurs, lernen wollen, „kein Interesse das zu lernen“.
+- Wie ich meine Beziehungen zu anderen Menschen gestalten will: mehr Kontakt, Gleichaltrige, Freunde finden, zugehörig fühlen, „Wunsch, dass sie in Kontakt kommt“.
+- Was ich sonst mit meiner verfügbaren Zeit machen will: Freizeitaktivitäten, Verein, Urlaub planen, Sport, Hobby, „nächstes Jahr“.
+- Was mir sonst noch wichtig ist: Gesundheit („OP gut vorbereiten“), Mobilität, Geld, Sicherheit, alles Zukünftige, das in keine der vier Zellen passt.
+Aktuelle Lebenssituation und personenbezogene Faktoren
+- Wie und wo ich jetzt wohne: „Ich wohne“, Haus, Wohnung, Wohnbereich, mit der Familie, allein, WG.
+- Was ich derzeit arbeite oder lerne: „Ich bin im …“, „Ich arbeite“, Werkstatt, Praktikum, Schule, sowie der bisherige Weg dorthin („Ich war in Reha, davor …“).
+- Wie jetzt meine Beziehungen zu anderen Menschen sind: „Ich verstehe mich mit“, „Ich fühle mich wohl“, Freunde, Familie, Kollegen.
+- Was ich sonst mit meiner verfügbaren Zeit mache: „In der Pause“, Hobby, Musik, basteln, Sport, Fernsehen.
+- Was mir sonst noch wichtig ist: Ich-Aussagen, die in keine der vier Zellen passen.
+Lebensbereiche
+- LB 1 Lernen und Wissensanwendung: lernen, üben, verstehen, lesen, schreiben, rechnen, merken, sich etwas aneignen, Motivation für Neues, Anleitung, Navi. Falle: Konzentration bei der Arbeit gehört zu LB 2, nicht LB 1.
+- LB 2 Allgemeine Aufgaben und Anforderungen: Tagesablauf, Wochenablauf, Routine, Arbeitszeiten, Pausen, Aufgaben übernehmen, Pflichten, Konzentration und Ausdauer bei Aufgaben, Stress, Termine einhalten, Zeitfenster („in der Zeit gehe ich mit ihr einkaufen“).
+- LB 3 Kommunikation: sprechen, verstehen, sich ausdrücken, Telefon, Handy, Nachrichten schreiben, Gebärden, Dolmetscher, Sprache. Falle: „Kontakt zu anderen“ ist LB 7, nicht LB 3. Ohne Fund: „Keine Einschränkungen ersichtlich.“
+- LB 4 Mobilität: gehen, Treppe, Fahrrad als Verkehrsmittel, Bus, Bushaltestelle, Auto, Fahrdienst, gefahren werden, Strecke, km, Schnee, „im Winter nicht mobil“, Wege zur Arbeit.
+- LB 5 Selbstversorgung: Körperpflege, anziehen, essen und trinken als Tätigkeit, auf die Gesundheit achten, Ärzte, Arzttermine, Arztwechsel, Medikamente, OP, Reha, MRT, Therapie, Gewicht, „Termin selber machen“.
+- LB 6 Häusliches Leben: einkaufen, kochen, backen, Mahlzeiten zubereiten, Fertiggericht, Haushalt, putzen, Wäsche, aufräumen, Wohnung pflegen. Falle: Zubereitung ist LB 6, das Essen selbst ist LB 5; steht beides in einem Satz, bleibt der Satz in LB 6.
+- LB 7 Interpersonelle Interaktionen und Beziehungen: Kontakt, Beziehung, Freunde, Kollegen, „verstehe mich mit“, zugehörig, zurückhaltend, „braucht Impulse von außen“, Nähe, Vertrauen, Beziehung zu Betreuungs- und Fachpersonen. Falle: Beziehung im Arbeitskontext zusätzlich in LB 8.
+- LB 8 Bedeutende Lebensbereiche: Arbeit, Werkstatt, Beschäftigung, Praktikum, Schule, Ausbildung, Arbeitsplatz, Arbeitsbereich, Aufträge, Aufgaben in der Werkstatt, Arbeitsleistung („genau und gewissenhaft“), Ankommen in der Werkstatt, körperliche Belastbarkeit bei der Arbeit (sitzen, stehen), Fernziel Arbeitsmarkt, Geld, Rente. Falle: Gesundheit im Arbeitskontext („hat sie bei der Arbeit körperlich beeinflusst“) gehört zu LB 8, ärztliche Behandlung zu LB 5.
+- LB 9 Gemeinschafts-, soziales und staatsbürgerliches Leben: Freizeit, Hobby, Musik, basteln, puzzeln, Sport, Fahrrad als Fitness oder Freizeit, Urlaub, Freizeitmaßnahme, Konzert, Verein, Angebote (z. B. Aktion Mensch), Kirche, Ehrenamt, mit Kindern spielen, Feste.
+Fallen für alle Blöcke
+- Kinder, Angehörige und Termine anderer Sprecher beschreiben deren Alltag; sie kommen nur in den Bogen, wenn sie den Alltag der Person strukturieren (dann LB 2) oder die Person daran teilnimmt (dann LB 9).
+- Gesundheitsangaben stehen im Erhebungsbogen nur als Zitat. Diagnosen und Bewertungen gehören in den Gesundheitsbogen B.
+- „Betreuerin“ kann Wohn-, Werkstatt- oder rechtliche Betreuung meinen. Zitat übernehmen, nicht deuten.
+
+AUSGABEFORMAT
+Gib die gesamte Antwort als einen einzigen Codeblock aus (drei Backticks, dann text). Ersetze [DATUM] durch das Gesprächsdatum, [NAME] durch den Namen. Lasse keine Überschrift weg.
+
+```text
+BEI_BW C – ERHEBUNGSBOGEN – ÜBERTRAGUNG AUS DEM GESPRÄCH AM [DATUM]
+
+WÜNSCHE UND LEBENSVORSTELLUNGEN
+Wie und wo ich wohnen will
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am [DATUM]:
+…
+Was ich arbeiten oder lernen will
+Siehe Vorbereitungsbogen
+…
+Wie ich meine Beziehungen zu anderen Menschen gestalten will
+Siehe Vorbereitungsbogen
+…
+Was ich sonst mit meiner verfügbaren Zeit machen will
+Siehe Vorbereitungsbogen
+…
+Was mir sonst noch wichtig ist
+Siehe Vorbereitungsbogen
+…
+
+AKTUELLE LEBENSSITUATION UND PERSONENBEZOGENE FAKTOREN
+Wie und wo ich jetzt wohne
+Siehe Vorbereitungsbogen
+…
+Was ich derzeit arbeite oder lerne
+Siehe Vorbereitungsbogen
+…
+Wie jetzt meine Beziehungen zu anderen Menschen sind
+Siehe Vorbereitungsbogen
+…
+Was ich sonst mit meiner verfügbaren Zeit mache
+Siehe Vorbereitungsbogen
+…
+Was mir sonst noch wichtig ist
+Siehe Vorbereitungsbogen
+…
+
+LEBENSBEREICHE UND UMWELTFAKTOREN (ICF UND ICF-CY)
+Lebensbereich 1 – Lernen und Wissensanwendung
+Aus dem Gespräch am [DATUM]:
+…
+Lebensbereich 2 – Allgemeine Aufgaben und Anforderungen
+Aus dem Gespräch am [DATUM]:
+…
+Lebensbereich 3 – Kommunikation
+Aus dem Gespräch am [DATUM]:
+…
+Lebensbereich 4 – Mobilität
+Aus dem Gespräch am [DATUM]:
+…
+Lebensbereich 5 – Selbstversorgung
+Aus dem Gespräch am [DATUM]:
+…
+Lebensbereich 6 – Häusliches Leben
+Aus dem Gespräch am [DATUM]:
+…
+Lebensbereich 7 – Interpersonelle Interaktionen und Beziehungen
+Aus dem Gespräch am [DATUM]:
+…
+Lebensbereich 8 – Bedeutende Lebensbereiche
+Aus dem Gespräch am [DATUM]:
+…
+Lebensbereich 9 – Gemeinschafts-, soziales und staatsbürgerliches Leben
+Aus dem Gespräch am [DATUM]:
+…
+
+Übersicht Umweltfaktoren
+Aus dem Teilhabebericht vom [DATUM TEILHABEBERICHT]:   (oder: Aus dem Gespräch am [DATUM]:)
+Förderfaktoren:
+- … (Kürzel)
+Barrieren:
+- … (Kürzel)
+
+ERGÄNZENDE HINWEISE
+Entwurf, bitte prüfen: …
+
+ABDECKUNGSPRÜFUNG
+Protokollzeilen gesamt: …
+Davon mindestens einmal zugeordnet: …
+Nicht zugeordnete Sätze (wörtlich, mit Kürzel; sonst „keine“):
+- …
+Mehrfach zugeordnete Sätze (Kurzform, mit Blöcken):
+- …
+
+SELBSTPRÜFUNG
+1 Alle Überschriften der Vorlage in der richtigen Reihenfolge ausgegeben? ja/nein
+2 Jedes Zitat buchstabengetreu, mit Kürzel, ohne Umformulierung? ja/nein
+3 Jeder inhaltstragende Satz des Protokolls mindestens einmal enthalten? ja/nein
+4 Kein Satz mehr als zweimal in den Lebensbereichen, kein Satz doppelt im selben Block? ja/nein
+5 „Siehe Vorbereitungsbogen“ in allen zehn Tabellenzellen als erste Zeile? ja/nein
+6 Umweltfaktoren und Ergänzende Hinweise enthalten nur, was im Protokoll steht? ja/nein
+```
+
+=== QUELLE 1: GESPRÄCHSPROTOKOLL ===
+[HIER DEN TEXT DES GESPRÄCHSPROTOKOLLS EINFÜGEN]
+=== ENDE QUELLE 1 ===
+
+=== QUELLE 2: TEILHABEBERICHT (optional, sonst leer lassen) ===
+[HIER DEN TEXT DES TEILHABEBERICHTS EINFÜGEN ODER LEER LASSEN]
+=== ENDE QUELLE 2 ===
+</pre>
+  </div>
+</section>
+
+<section id="signale">
+  <h2>Zuordnung: Welche Aussage in welchen Block gehört</h2>
+  <p class="sub">Signalwörter je Block mit einer wörtlichen Fundstelle aus Beispiel 1. Der vollständige Katalog mit allen Fallen steht im Prompt.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Block</th><th>Signalwörter</th><th>Fund in Beispiel 1</th></tr></thead>
+    <tbody>
+      <tr><td class="f">Wünsche</td><td>wünscht sich, möchte, will, Fernziel, „kann ich mir vorstellen“, nächstes Jahr, „wir haben den Wunsch“</td><td><q>hat das Fernziel auf dem ersten Arbeitsmarkt zu arbeiten</q> (FS)</td></tr>
+      <tr><td class="f">Lebenssituation</td><td>Ich-Aussagen ohne Kürzel: „Ich wohne“, „Ich bin im“, „Ich war in“, „In der Pause“</td><td><q>Ich wohne mit der Familie im gleichen Haus, habe aber einen abgetrennten Wohnbereich.</q></td></tr>
+      <tr><td class="f">LB 1 Lernen</td><td>lernen, üben, sich aneignen, Motivation für Neues</td><td><q>da war sie aber noch nicht so motiviert</q> (FS)</td></tr>
+      <tr><td class="f">LB 2 Aufgaben</td><td>Tagesablauf, Arbeitszeiten, Pausen, Konzentration bei Aufgaben, Zeitfenster</td><td><q>Halb 9 fange ich an, um 10 hab ich Pause</q></td></tr>
+      <tr><td class="f">LB 3 Kommunikation</td><td>sprechen, verstehen, Telefon, Gebärden, Sprache</td><td>kein Fund → „Keine Einschränkungen ersichtlich.“</td></tr>
+      <tr><td class="f">LB 4 Mobilität</td><td>gehen, Treppe, Fahrrad als Verkehrsmittel, Bus, Bushaltestelle, km, Schnee</td><td><q>es sind 5KM bis zur Bushaltestelle in Bad Wurzach</q> (FS)</td></tr>
+      <tr><td class="f">LB 5 Selbstversorgung</td><td>Ärzte, Arzttermine, OP, Reha, MRT, Medikamente</td><td><q>Jetzt haben wir einen OP-Vorbesprechungstermin in Biberach.</q> (FS)</td></tr>
+      <tr><td class="f">LB 6 Häusliches Leben</td><td>einkaufen, kochen, backen, Fertigsuppe, Wäsche, putzen</td><td><q>Wäsche waschen, putzen und so weiter mache ich alles selber.</q></td></tr>
+      <tr><td class="f">LB 7 Beziehungen</td><td>Kontakt, „verstehe mich mit“, zugehörig, Impulse von außen, Betreuerin</td><td><q>Ich verstehe mich mit Alexa ganz gut</q></td></tr>
+      <tr><td class="f">LB 8 Bedeutende Lebensbereiche</td><td>Werkstatt, Arbeitsbereich, Aufträge, Arbeitsleistung, Belastbarkeit bei der Arbeit, Fernziel Arbeitsmarkt</td><td><q>Du kannst viel gut, arbeitest genau und gewissenhaft.</q> (FD)</td></tr>
+      <tr><td class="f">LB 9 Gemeinschaft</td><td>Freizeit, Musik, basteln, Urlaub, Konzert, Angebote, Fahrrad als Fitness, mit Kindern spielen</td><td><q>auf eine Freizeit in Italien mit der Werkstatt</q> (FF)</td></tr>
+      <tr><td class="f">Umweltfaktoren</td><td>Personen und Dinge, die helfen oder hindern, in Stichworten mit Kürzel</td><td>Förderfaktor: Pflegefamilie im gleichen Haus (FS, FF); Barriere: im Winter nicht mobil (FS)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h3>Drei Regeln, die in Beispiel 1 den Unterschied machen</h3>
+  <div class="grid">
+    <div class="panel"><h3>Gesundheit: LB 8 oder LB 5</h3><p>Im Arbeitskontext („hat sie bei der Arbeit auf dem Hof körperlich stark beeinflusst“) LB 8. Ärztliche Behandlung („OP-Vorbesprechungstermin“) LB 5.</p></div>
+    <div class="panel"><h3>Fahrrad: LB 4 oder LB 9</h3><p>Als Verkehrsmittel („mit dem Fahrrad nach Wurzach zur Arbeit“) LB 4. Als Fitness und Freizeit („sie ist viel Fahrrad gefahren“) LB 9.</p></div>
+    <div class="panel"><h3>Alltag anderer Sprecher</h3><p>Zählt nur, wenn er den Alltag der Person strukturiert. Die Kindergartenzeiten der Pflegekinder stehen in LB 2, weil FS in dieser Zeit mit der Person einkaufen geht.</p></div>
+  </div>
+</section>
+
+<section id="test">
+  <h2>Testlauf an Beispiel 1</h2>
+  <p class="sub">Der Prompt wurde mit dem Protokoll von Beispiel 1 durchgeführt und gegen den von der Fachkraft ausgefüllten Bogen C abgeglichen.</p>
+  <div class="stats">
+    <div class="stat"><b>7</b><span>Lebensbereiche identisch mit der Referenz</span></div>
+    <div class="stat"><b>1</b><span>Lebensbereich mit einer zusätzlichen Zuordnung (LB 7)</span></div>
+    <div class="stat"><b>1</b><span>Lebensbereich mit Sätzen, die im Protokoll fehlen (LB 8)</span></div>
+    <div class="stat"><b>0</b><span>Fehlzuordnungen</span></div>
+  </div>
+  <p class="note">Die Referenz enthält drei Aussagen, die im gelieferten Protokoll nicht vorkommen, und einen doppelten Eintrag in LB 8. Beides kann der Prompt nicht erzeugen: Er fügt nichts hinzu, und die Abdeckungsprüfung verhindert Doppelungen. Die Wünsche-Tabelle füllt er stärker als die Referenz; die Ergänzungen sind optional.</p>
+  <details>
+    <summary>Soll-Ausgabe der KI für Beispiel 1 anzeigen</summary>
+    <pre class="soll">BEI_BW C – ERHEBUNGSBOGEN – ÜBERTRAGUNG AUS DEM GESPRÄCH AM XX.XX.XXXX
+
+WÜNSCHE UND LEBENSVORSTELLUNGEN
+Wie und wo ich wohnen will
+Siehe Vorbereitungsbogen
+Was ich arbeiten oder lernen will
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+FS: Anna Apfelkuchen hat das Fernziel auf dem ersten Arbeitsmarkt zu arbeiten, z.B. im Getränkemarkt oder sonst einer Firma in Wurzach. Sie wünscht sich den Kontakt zur Außenwelt.
+Wie ich meine Beziehungen zu anderen Menschen gestalten will
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+FD: Der Kontakt mit anderen ist lustig und freundlich. Es braucht aber bisher noch Impulse von außen. Wir haben den Wunsch unsererseits, dass sie noch mehr in Kontakt mit anderen kommt und sich noch mehr zugehörig fühlt.
+FF: Dann kann sie auch mehr mit Gleichaltrigen in Kontakt kommen.
+Was ich sonst mit meiner verfügbaren Zeit machen will
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+FS: Nächstes Jahr greifen wir voll an mit Freizeitaktivitäten.
+Was mir sonst noch wichtig ist
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+FS: Jetzt ist es wichtig die OP gut vorzubereiten und so fit wie möglich da rein zu gehen. Danach müssen wir dann halt einfach mal schauen, wie´s Weitergeht.
+
+AKTUELLE LEBENSSITUATION UND PERSONENBEZOGENE FAKTOREN
+Wie und wo ich jetzt wohne
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+Ich wohne mit der Familie im gleichen Haus, habe aber einen abgetrennten Wohnbereich.
+Was ich derzeit arbeite oder lerne
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+Ich war in Reha, davor war ich auf dem Reiterhof. Danach bin ich hierhergekommen (Liebenau). Es hat sich ganz gut entwickelt.
+Ich bin im Innenbereich und arbeite gerne mit Fahrradtaschen.
+Wie jetzt meine Beziehungen zu anderen Menschen sind
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+Ich fühle mich wohl, es ist okay.  Ich verstehe mich mit Alexa ganz gut, haben letztens mal zusammengearbeitet.
+Was ich sonst mit meiner verfügbaren Zeit mache
+Siehe Vorbereitungsbogen
+Ergänzung aus dem Gespräch am XX.XX.XXXX:
+In der Pause höre ich Musik
+Was mir sonst noch wichtig ist
+Siehe Vorbereitungsbogen
+
+LEBENSBEREICHE UND UMWELTFAKTOREN (ICF UND ICF-CY)
+Lebensbereich 1 – Lernen und Wissensanwendung
+Aus dem Gespräch am XX.XX.XXXX:
+FS: Das Fahrrad hat sie seit letztes Jahr August/September, da war sie aber noch nicht so motiviert. Das hat dann erst Anfang diesen Jahres angefangen.
+Lebensbereich 2 – Allgemeine Aufgaben und Anforderungen
+Aus dem Gespräch am XX.XX.XXXX:
+Halb 9 fange ich an, um 10 hab ich Pause, dann arbeite ich nochmal 10-11:45. Wie es ist mit der längeren Konzentration ist noch fraglich, weil der Tag noch nicht so lange ist.
+FS: Der Mittlere ist im Sprachheilkindergarten, sie fährt mit dem Fahrdienst. Meine kleine Tochter ist Montag mittags im Kindi und meine große Tochter fährt mit dem Bus zur Schule, dann hat sie Klavier. In der Zeit gehe ich mit Anna Apfelkuchen einkaufen.
+Ich arbeite Dienstag im Küchenteam für die Kaffeepause. Ich bereite Kaffee vor, helfe nach der Pause beim Aufräumen und Tische putzen.
+FD: Alle müssen da helfen.
+Lebensbereich 3 – Kommunikation
+Aus dem Gespräch am XX.XX.XXXX:
+Keine Einschränkungen ersichtlich.
+Lebensbereich 4 – Mobilität
+Aus dem Gespräch am XX.XX.XXXX:
+FS: es sind 5KM bis zur Bushaltestelle in Bad Wurzach. Wir wohnen sehr außerhalb. Ich habe deshalb jetzt lange für eine Bushaltestelle bei uns gekämpft, die bekommen wir jetzt ab September.
+Ich fahre mit dem Fahrrad nach Wurzach zur Arbeit. Hier her fahre ich mit dem Bus.
+FS: Das Fahrrad hat sie seit letztes Jahr August/September, da war sie aber noch nicht so motiviert. Das hat dann erst Anfang diesen Jahres angefangen.
+FF: Anna Apfelkuchen muss eine Treppe im Haus steigen.
+FS: Im Winter ist Anna Apfelkuchen nicht mobil, wir haben immer viel Schnee, sodass ich sie fahren muss. Ab September haben wir einen Bus, der fährt auch 2x mittags.
+Lebensbereich 5 – Selbstversorgung
+Aus dem Gespräch am XX.XX.XXXX:
+FS: Wir waren dann viel bei Ärzten und haben es auf den konventionellen Weg mit einer Reha versucht. Das hat nur mäßig Erfolge gebracht. Jetzt haben wir einen OP-Vorbesprechungstermin in Biberach. Ggf. machen wir auch nochmal ein MRT.
+FF: Die ärztliche Begleitung teilen wir uns, wir sind viel im Austausch. Anna Apfelkuchen macht den ein oder anderen Termin auch selber.
+FS: Jetzt haben wir noch einen letzten Arztwechsel, dann haben wir alle Ärzte hier in der Region.
+FS: Jetzt ist es wichtig die OP gut vorzubereiten und so fit wie möglich da rein zu gehen. Danach müssen wir dann halt einfach mal schauen, wie´s Weitergeht.
+Lebensbereich 6 – Häusliches Leben
+Aus dem Gespräch am XX.XX.XXXX:
+FS: 1x/Woche gehen wir zusammen einkaufen.
+Wäsche waschen, putzen und so weiter mache ich alles selber.
+Essen tu ich mit der Familie, Frühstücken tu ich allein. Kochen tu ich nicht, das mag ich nicht und kann ich auch nicht. Ich habe kein Interesse das zu lernen.
+FS: Wenn niemand da ist, gibt es Fertigsuppe.
+FS: Wir gehen 1x/Woche zusammen einkaufen, beim Kochen sitzt sie dann einfach dabei und schaut zu und wir quatschen über den Herd. Sie muss nicht helfen, wenn sie nicht will.
+Beim Backen bin ich dabei.
+Lebensbereich 7 – Interpersonelle Interaktionen und Beziehungen
+Aus dem Gespräch am XX.XX.XXXX:
+FD: Der Kontakt mit anderen ist lustig und freundlich. Es braucht aber bisher noch Impulse von außen. Wir haben den Wunsch unsererseits, dass sie noch mehr in Kontakt mit anderen kommt und sich noch mehr zugehörig fühlt.
+Ich fühle mich wohl, es ist okay.  Ich verstehe mich mit Alexa ganz gut, haben letztens mal zusammengearbeitet.
+FS: Es gab jetzt ein Betreuerinnenwechsel. Zu Frau Koch hatte sie einen engen Kontakt, mit Frau Holzmann jetzt klappt die Organisation gut, sie haben aber keinen so engen Kontakt.
+Lebensbereich 8 – Bedeutende Lebensbereiche
+Aus dem Gespräch am XX.XX.XXXX:
+FS: Es ist besser als erwartet. Sie hatte einen dreifachen Bandscheibenvorfall, das hat sie bei der Arbeit auf dem Hof körperlich stark beeinflusst.
+FD: Anna Apfelkuchen musste erstmal ankommen in der Werkstatt, jetzt kommt sie einfach, das klappt besser als ich dachte. Es ist eine Motivation hier zu sein zu merken.
+SD: Was sind die Aufgaben in der Werkstatt?
+Ich bin im Innenbereich und arbeite gerne mit Fahrradtaschen.
+FD: Wir haben ein offenes Konzept mit mehreren Arbeitsbereichen: Holzbereich, Grünland, Herle Brauerei, Innenbereich. Die Beschäftigten wechseln die Plätze. So soll mehr Förderung passieren. Wir haben immer verschiedene Aufträge, meistens haben wir 3-4 Aufträge gleichzeitig in der Bearbeitung. Man kann immer aussuchen, was man machen will, das fällt die aber noch schwer. Ich will dir nichts aufdrücken, du sollst aber auch die Chance zur Abwechslung nutzen.
+FD: Du kannst viel gut, arbeitest genau und gewissenhaft.
+FS: Im Dezember hast du hier angefangen.
+Ich arbeite Dienstag im Küchenteam für die Kaffeepause. Ich bereite Kaffee vor, helfe nach der Pause beim Aufräumen und Tische putzen.
+FD: Alle müssen da helfen.
+FS: 2 Stunden am Stück sitzen ist schwierig, nur stehen ist auch schwierig, am besten abwechselnd. Sie ist jetzt konsequent dabei Gewicht zu verlieren. Vielleicht wäre der Außenbereich auch mal was zum Kennenlernen. Es ist wichtig eine Balance zu finden zwischen gut und zu viel. Z.B. 1x/Woche in den Außenbereich.
+FS: Anna Apfelkuchen hat das Fernziel auf dem ersten Arbeitsmarkt zu arbeiten, z.B. im Getränkemarkt oder sonst einer Firma in Wurzach. Sie wünscht sich den Kontakt zur Außenwelt.
+FS: Es gab jetzt ein Betreuerinnenwechsel. Zu Frau Koch hatte sie einen engen Kontakt, mit Frau Holzmann jetzt klappt die Organisation gut, sie haben aber keinen so engen Kontakt.
+Lebensbereich 9 – Gemeinschafts-, soziales und staatsbürgerliches Leben
+Aus dem Gespräch am XX.XX.XXXX:
+FS: Anna Apfelkuchen war sehr fit die letzten Monate, sie ist viel Fahrrad gefahren.
+In der Pause höre ich Musik
+FS: Anna Apfelkuchen macht gerne Pailettenbilder, früher hat sie mehr gepuzzelt, jetzt sind es eher die Glitzersteine.
+FF: Das ist jetzt grade halt auch von der Krankheit überlagert.
+FF: Anna Apfelkuchen geht aber dieses Jahr auch noch in den Urlaub, auf eine Freizeit in Italien mit der Werkstatt, das ist ein großer Fortschritt.
+FF: Es gibt auch Angebote von Aktion Mensch, da ist sie bisher aber nicht so offen, es geht viel um ihre Krankheit und sich auf die Menschen mit Behinderung und die Infrastruktur einzulassen.
+FS: sie spielt gerne mit meinen 3 Kindern, das macht sie gern, da ist sie manchmal ganz schön eingespannt.
+FS: Manchmal muss man sie aus der Reserve locken, auf den Urlaub z.B. freut sie sich, da ist sie sehr happy.
+Im Oktober ist der Urlaub, 5 Tage, 4 Nächte.
+FS: Dann haben wir Anfang September noch ein Konzert, da hat sie ein Ticket für Mathias Reim zu Weihnachten bekommen.
+Da kann ich alle Lieder auswendig.
+FS: Nächstes Jahr greifen wir voll an mit Freizeitaktivitäten.
+FF: Dann kann sie auch mehr mit Gleichaltrigen in Kontakt kommen.
+
+Übersicht Umweltfaktoren
+Aus dem Gespräch am XX.XX.XXXX:
+Förderfaktoren:
+- Pflegefamilie im gleichen Haus: gemeinsames Einkaufen, Fahrten im Winter, geteilte ärztliche Begleitung (FS, FF)
+- Werkstatt mit offenem Konzept und Wechsel der Arbeitsbereiche, Fachdienst bietet Abwechslung an (FD)
+- Fahrrad als eigenes Verkehrsmittel seit Anfang des Jahres (FS, Person)
+- Neue Bushaltestelle am Wohnort ab September, Bus auch mittags (FS)
+- Freizeitangebote: Werkstattfreizeit in Italien, Angebote von Aktion Mensch, Konzert (FF, FS)
+Barrieren:
+- Sehr ländliche Wohnlage, 5 km bis zur Bushaltestelle, im Winter nicht mobil (FS)
+- Dreifacher Bandscheibenvorfall, OP steht aus, längeres Sitzen und Stehen schwierig (FS)
+- Treppe im Haus (FF)
+- Betreuerinnenwechsel, weniger enger Kontakt zur neuen Betreuerin (FS)
+- Auswahl aus mehreren Aufgaben fällt noch schwer (FD)
+
+ERGÄNZENDE HINWEISE
+Entwurf, bitte prüfen: Frau Anna Apfelkuchen arbeitet seit Dezember im Innenbereich der Werkstatt der Liebenau und ist dort nach Angaben des Fachdienstes angekommen. Im Vordergrund steht derzeit die Vorbereitung einer Operation nach einem dreifachen Bandscheibenvorfall; wie es danach weitergeht, ist offen. Als Fernziel wurde eine Tätigkeit auf dem ersten Arbeitsmarkt genannt.
+
+ABDECKUNGSPRÜFUNG
+Protokollzeilen gesamt: 45
+Davon mindestens einmal zugeordnet: 45
+Nicht zugeordnete Sätze (wörtlich, mit Kürzel; sonst „keine“):
+- keine
+Mehrfach zugeordnete Sätze (Kurzform, mit Blöcken):
+- FS: Das Fahrrad hat sie seit … → LB 1, LB 4
+- Ich arbeite Dienstag im Küchenteam … → LB 2, LB 8
+- FD: Alle müssen da helfen. → LB 2, LB 8
+- FS: Es gab jetzt ein Betreuerinnenwechsel … → LB 7, LB 8
+- FD: Der Kontakt mit anderen ist lustig … → LB 7, Wünsche Beziehungen
+- FS: Anna Apfelkuchen hat das Fernziel … → LB 8, Wünsche Arbeiten
+- FS: Nächstes Jahr greifen wir voll an … → LB 9, Wünsche Zeit
+- FF: Dann kann sie auch mehr mit Gleichaltrigen … → LB 9, Wünsche Beziehungen
+- FS: Jetzt ist es wichtig die OP gut vorzubereiten … → LB 5, Wünsche Sonstiges
+- Ich bin im Innenbereich … → LB 8, Lebenssituation Arbeiten
+- Ich fühle mich wohl … → LB 7, Lebenssituation Beziehungen
+- In der Pause höre ich Musik → LB 9, Lebenssituation Zeit
+
+SELBSTPRÜFUNG
+1 Alle Überschriften der Vorlage in der richtigen Reihenfolge ausgegeben? ja
+2 Jedes Zitat buchstabengetreu, mit Kürzel, ohne Umformulierung? ja
+3 Jeder inhaltstragende Satz des Protokolls mindestens einmal enthalten? ja
+4 Kein Satz mehr als zweimal in den Lebensbereichen, kein Satz doppelt im selben Block? ja
+5 „Siehe Vorbereitungsbogen“ in allen zehn Tabellenzellen als erste Zeile? ja
+6 Umweltfaktoren und Ergänzende Hinweise enthalten nur, was im Protokoll steht? ja</pre>
+  </details>
+  <h3>Nächste Schritte</h3>
+  <p>Prompt 3 für den Gesundheitsbogen B, Prompt 4 für die GP-Vorbereitung. Für die GP-Vorbereitung ist vorher zu klären, ob dort Zitate oder eine Zusammenfassung in der dritten Person stehen sollen.</p>
+</section>
+
+<footer>Grundlage: BEI_BW 2024, Stand 10.09.2024 (Ministerium für Soziales, Gesundheit und Integration Baden-Württemberg). Beispieldaten sind anonymisiert.</footer>
+</div>
+
+<script>
+(function(){
+  var btn=document.getElementById('copyBtn');
+  btn.addEventListener('click',function(){
+    var txt=document.getElementById(btn.dataset.target).textContent;
+    function done(ok){btn.textContent=ok?'Kopiert':'Kopieren fehlgeschlagen, bitte markieren';btn.classList.toggle('done',ok);setTimeout(function(){btn.textContent='Prompt kopieren';btn.classList.remove('done')},2200)}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){done(true)},function(){done(false)})}
+    else{try{var r=document.createRange();r.selectNodeContents(document.getElementById(btn.dataset.target));var s=window.getSelection();s.removeAllRanges();s.addRange(r);done(document.execCommand('copy'))}catch(e){done(false)}}
+  });
+})();
+</script>

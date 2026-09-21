@@ -92,3 +92,33 @@ wesentlichen Behinderung, Aufgabenkreise der Betreuung) kommt aus der Akte.
 | Kompetenzen und Ressourcen | kann, genau, gewissenhaft, selber, Fahrrad | „Du kannst viel gut, arbeitest genau und gewissenhaft.“ (FD); „Wäsche waschen, putzen und so weiter mache ich alles selber.“ |
 | Neue Ziele / Maßnahmen | 1x/Woche, Option, umstrukturieren, „überlegs mir“ | „Z.B. 1x/Woche in den Außenbereich.“ (FS); „ABM Wlaking zwischen 13-13:45“ (FD) |
 | Krankenhausbegleitung | Krankenhaus, OP, Begleitung | „OP-Vorbesprechungstermin in Biberach“ (FS) → Frage stellen, nicht ableiten |
+
+## 4. Erhebungsbogen C: Lebensbereich für Lebensbereich
+
+Grundlage: die Zuordnung der Fachkraft in Beispiel 1. Der vollständige Katalog mit Fallen
+steht im Prompt `05_prompt_erhebungsbogen_c.txt`.
+
+| Block | Signalwörter | Beispiel 1 (wörtlich, Sprecher) |
+|---|---|---|
+| Wünsche | wünscht sich, möchte, will, Fernziel, „kann ich mir vorstellen“, nächstes Jahr, „wir haben den Wunsch“ | „hat das Fernziel auf dem ersten Arbeitsmarkt zu arbeiten“ (FS); „Nächstes Jahr greifen wir voll an mit Freizeitaktivitäten.“ (FS) |
+| Lebenssituation | Ich-Aussagen ohne Kürzel: „Ich wohne“, „Ich bin im“, „Ich war in“, „In der Pause“ | „Ich wohne mit der Familie im gleichen Haus, habe aber einen abgetrennten Wohnbereich.“ |
+| LB 1 Lernen | lernen, üben, sich aneignen, Motivation für Neues | „da war sie aber noch nicht so motiviert“ (FS) |
+| LB 2 Aufgaben | Tagesablauf, Arbeitszeiten, Pausen, Konzentration bei Aufgaben, Zeitfenster, Pflichten | „Halb 9 fange ich an, um 10 hab ich Pause“; „In der Zeit gehe ich mit Anna Apfelkuchen einkaufen.“ (FS) |
+| LB 3 Kommunikation | sprechen, verstehen, Telefon, Gebärden, Sprache | kein Fund → „Keine Einschränkungen ersichtlich.“ |
+| LB 4 Mobilität | gehen, Treppe, Fahrrad als Verkehrsmittel, Bus, Bushaltestelle, km, Schnee, fahren | „es sind 5KM bis zur Bushaltestelle in Bad Wurzach“ (FS); „muss eine Treppe im Haus steigen“ (FF) |
+| LB 5 Selbstversorgung | Ärzte, Arzttermine, OP, Reha, MRT, Medikamente, Gesundheit achten | „Jetzt haben wir einen OP-Vorbesprechungstermin in Biberach.“ (FS) |
+| LB 6 Häusliches Leben | einkaufen, kochen, backen, Fertigsuppe, Wäsche, putzen, Haushalt | „Wäsche waschen, putzen und so weiter mache ich alles selber.“ |
+| LB 7 Beziehungen | Kontakt, „verstehe mich mit“, zugehörig, Impulse von außen, Betreuerin | „Ich verstehe mich mit Alexa ganz gut“ |
+| LB 8 Bedeutende Lebensbereiche | Werkstatt, Arbeitsbereich, Aufträge, Arbeitsleistung, Belastbarkeit bei der Arbeit, Fernziel Arbeitsmarkt, Gesundheit im Arbeitskontext | „Du kannst viel gut, arbeitest genau und gewissenhaft.“ (FD); „2 Stunden am Stück sitzen ist schwierig“ (FS) |
+| LB 9 Gemeinschaft | Freizeit, Musik, basteln, Urlaub, Konzert, Angebote, Fahrrad als Fitness, mit Kindern spielen | „auf eine Freizeit in Italien mit der Werkstatt“ (FF); „Da kann ich alle Lieder auswendig.“ |
+| Umweltfaktoren | Personen und Dinge, die helfen oder hindern: Pflegefamilie, Bushaltestelle, Schnee, Treppe, Werkstattkonzept | Förderfaktor: Pflegemutter; Barriere: ländliche Wohnlage im Winter |
+
+Drei Zuordnungsregeln, die in Beispiel 1 den Unterschied machen:
+
+1. **Gesundheit im Arbeitskontext gehört zu LB 8, ärztliche Behandlung zu LB 5.** „Das hat
+   sie bei der Arbeit auf dem Hof körperlich stark beeinflusst“ → LB 8; „OP-Vorbesprechungstermin“ → LB 5.
+2. **Fahrrad ist zweideutig.** Als Verkehrsmittel („Ich fahre mit dem Fahrrad nach Wurzach zur
+   Arbeit“) LB 4, als Fitness und Freizeit („sie ist viel Fahrrad gefahren“) LB 9.
+3. **Alltag anderer Sprecher zählt nur, wenn er den Alltag der Person strukturiert.** Die
+   Kindergarten- und Schulzeiten der Pflegekinder stehen in LB 2, weil FS in dieser Zeit mit
+   der Person einkaufen geht.
