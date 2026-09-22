@@ -31,6 +31,11 @@ export const opts = {
 let drag = null;        // laufende Interaktion
 let cropRect = null;    // Vorschau beim Zuschneiden
 
+/* Griffe und Auswahlrahmen folgen der Akzentfarbe des Stylesheets,
+   damit ein Farbwechsel im Theme nur an einer Stelle noetig ist. */
+const akzent = () => getComputedStyle(document.documentElement)
+  .getPropertyValue('--accent').trim() || '#ede813';
+
 export const getCropRect = () => cropRect;
 export const clearCrop = () => { cropRect = null; };
 
@@ -378,7 +383,7 @@ export function drawOverlay(ctx) {
     ctx.restore();
   };
 
-  if (state.selection) dash(state.selection, '#fff');
+  if (state.selection) dash(state.selection, '#ffffff');
   if (cropRect && cropRect.w > 1) {
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,.45)';
@@ -387,14 +392,14 @@ export function drawOverlay(ctx) {
     ctx.rect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
     ctx.fill('evenodd');
     ctx.restore();
-    dash(cropRect, '#2d7ff9');
+    dash(cropRect, akzent());
   }
 
   const l = activeLayer();
   if (l && (state.tool === 'move')) {
     const h = handlesFor(l);
     ctx.save();
-    ctx.strokeStyle = '#2d7ff9';
+    ctx.strokeStyle = akzent();
     ctx.lineWidth = 1.4 / z;
     ctx.beginPath();
     ctx.moveTo(h.corners[0].x, h.corners[0].y);
@@ -406,7 +411,7 @@ export function drawOverlay(ctx) {
     ctx.beginPath(); ctx.moveTo(mTop.x, mTop.y); ctx.lineTo(h.rotate.x, h.rotate.y); ctx.stroke();
 
     const r = 4.5 / z;
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = akzent();
     for (const c of h.corners) {
       ctx.beginPath(); ctx.rect(c.x - r, c.y - r, r * 2, r * 2); ctx.fill(); ctx.stroke();
     }

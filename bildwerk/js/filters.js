@@ -5,16 +5,19 @@ const px = (c) => c.getContext('2d', { willReadFrequently: true }).getImageData(
 const put = (c, d) => { c.getContext('2d').putImageData(d, 0, 0); return c; };
 const clamp = (v) => v < 0 ? 0 : v > 255 ? 255 : v;
 
-/** Nicht-destruktive Anpassungen dauerhaft ins Pixelbild schreiben. */
+/** Nicht-destruktive Anpassungen dauerhaft ins Pixelbild schreiben.
+ *  Liefert immer dieselbe Form, damit die Aufrufer nicht zwei Faelle
+ *  unterscheiden muessen: { canvas, offset, adjust, veraendert }. */
 export function bakeAdjust(canvas, adjust) {
   const f = filterString(adjust);
-  if (f === 'none') return canvas;
+  if (f === 'none')
+    return { canvas, offset: 0, adjust: defaultAdjust(), veraendert: false };
   const pad = Math.ceil((adjust.blur || 0) * 3);
   const out = makeCanvas(canvas.width + pad * 2, canvas.height + pad * 2);
   const ctx = out.getContext('2d');
   ctx.filter = f;
   ctx.drawImage(canvas, pad, pad);
-  return { canvas: out, offset: pad, adjust: defaultAdjust() };
+  return { canvas: out, offset: pad, adjust: defaultAdjust(), veraendert: true };
 }
 
 export function convolve(canvas, kernel, divisor = 1, offset = 0) {

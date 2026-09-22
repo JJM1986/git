@@ -1,14 +1,16 @@
 /* Bildwerk – Befehle aus Menü, Panels und Tastatur. */
 import {
   state, page, layers, activeLayer, setActiveLayer, addLayer, removeLayer, createLayer,
-  createPage, makeCanvas, cloneCanvas, pageToCanvas, flattenLayer, renderPage, commit, undo, redo,
+  createPage, makeCanvas, cloneCanvas, pageToCanvas, drawLayer, renderPage, commit, undo, redo,
+  unionBounds, fitCanvasSize, docToLayer,
   notify, say, defaultAdjust, defaultText, refreshLayer, resetHistory, beginPixelEdit, layerMatrix,
 } from './core.js';
 import * as F from './filters.js';
 import * as PDF from './pdfio.js';
-import { modal, info, fitZoom, setZoom, refreshFontSelect, setTool, renderAll } from './ui.js';
+import { modal, info, fitZoom, setZoom, refreshFontSelect, setTool, renderAll, showProgress } from './ui.js';
 import { loadFontFile, serializeFonts, restoreFonts, customFonts } from './fonts.js';
 import { opts, getCropRect, clearCrop } from './tools.js';
+import { contentAwareResize, maxPixels } from './seamcarve.js';
 
 /* ---------------- Datei-Hilfen ---------------- */
 
@@ -140,6 +142,27 @@ function applyPixelOp(fn, label) {
   say(label + ' angewendet');
 }
 
+/** Ebenen in ein gemeinsames Canvas zeichnen, das ihren ganzen Inhalt fasst.
+ *  Ohne diesen Rahmen ginge alles verloren, was ueber die Leinwand ragt. */
+function combineLayers(list, { withPage = null, name = 'Ebene' } = {}) {
+  const b = unionBounds(list, withPage);
+  const fit = fitCanvasSize(b.w, b.h);
+  const beschnitten = fit.scale < 1;
+  const c = makeCanvas(b.w, b.h);
+  const ctx = c.getContext('2d');
+  ctx.translate(-b.x, -b.y);
+  if (withPage && withPage.bgColor) {
+    ctx.fillStyle = withPage.bgColor;
+    ctx.fillRect(0, 0, withPage.width, withPage.height);
+  }
+  for (const layer of list) drawLayer(ctx, layer);
+  const merged = createLayer({ name, canvas: c });
+  merged.x = b.x;
+  merged.y = b.y;
+  if (beschnitten) say('Hinweis: Der Inhalt war groesser als eine Leinwand fassen kann');
+  return merged;
+}
+
 function mergeDown() {
   const p = page();
   const l = activeLayer();
@@ -147,24 +170,39 @@ function mergeDown() {
   if (i < 1) { say('Darunter liegt keine Ebene'); return; }
   commit('Ebenen vereinen');
   const below = p.layers[i - 1];
-  const c = makeCanvas(p.width, p.height);
-  const ctx = c.getContext('2d');
-  const tmp = { ...p, bgColor: null, layers: [below, l] };
-  renderPage(tmp, ctx, { scale: 1, transparent: true });
-  const merged = createLayer({ name: below.name, canvas: c });
+  const merged = combineLayers([below, l], { name: below.name });
   p.layers.splice(i - 1, 2, merged);
   p.activeLayerId = merged.id;
   notify();
+  say('Ebenen vereint – auch was ueber die Leinwand ragt, bleibt erhalten');
 }
 
 function flattenPage() {
   const p = page();
   commit('Auf Hintergrund reduzieren');
-  const c = pageToCanvas(p, 1, !p.bgColor);
-  const l = createLayer({ name: 'Hintergrund', canvas: c });
-  p.layers = [l];
-  p.activeLayerId = l.id;
+  const merged = combineLayers(p.layers.filter(x => x.visible), { withPage: p, name: 'Hintergrund' });
+  p.layers = [merged];
+  p.activeLayerId = merged.id;
   notify();
+}
+
+/** Leinwand so vergroessern, dass jede Ebene vollstaendig darauf liegt. */
+function canvasToContent() {
+  const p = page();
+  const b = unionBounds(p.layers, p);
+  if (b.x === 0 && b.y === 0 && b.w === p.width && b.h === p.height) {
+    say('Alle Ebenen liegen bereits vollstaendig auf der Leinwand');
+    return;
+  }
+  commit('Leinwand auf Inhalt erweitern');
+  for (const layer of p.layers) { layer.x -= b.x; layer.y -= b.y; }
+  p.width = b.w;
+  p.height = b.h;
+  p.pdfSource = null;
+  p.pdfPoints = null;
+  notify();
+  fitZoom();
+  say(`Leinwand auf ${b.w}x${b.h} erweitert`);
 }
 
 function moveLayer(dir) {
@@ -209,6 +247,85 @@ function scaleDocument(factor) {
   p.pdfSource = null;
   notify();
   fitZoom();
+}
+
+/** Inhaltsbasiert skalieren: Dialog, Fortschritt, Anwendung auf die Ebene. */
+async function contentAwareDialog() {
+  const l = activeLayer();
+  if (!l) { say('Keine Ebene ausgewaehlt'); return; }
+  const w = l.canvas.width, h = l.canvas.height;
+  if (w * h > maxPixels) {
+    await info('Inhaltsbasiert skalieren',
+      `Diese Ebene hat ${(w * h / 1e6).toFixed(1)} Megapixel. Das Verfahren rechnet ` +
+      `Pfad fuer Pfad durch das Bild und waere hier zu langsam. Bitte die Ebene ` +
+      `zuerst ueber „Bearbeiten &rarr; Bildgroesse skalieren“ auf hoechstens ` +
+      `${maxPixels / 1e6} Megapixel bringen.`);
+    return;
+  }
+
+  const hatAuswahl = !!state.selection;
+  const r = await modal('Inhaltsbasiert skalieren', [
+    { key: 'w', label: `Neue Breite in Pixeln (jetzt ${w})`, type: 'number', value: w, min: 8, max: w * 2 },
+    { key: 'h', label: `Neue Hoehe in Pixeln (jetzt ${h})`, type: 'number', value: h, min: 8, max: h * 2 },
+    ...(hatAuswahl ? [{ key: 'schutz', label: 'Ausgewaehlten Bereich schuetzen', type: 'checkbox', value: true }] : []),
+  ], { okLabel: 'Skalieren', text:
+    'Ruhige Bildbereiche geben nach, Motive behalten ihre Form. ' +
+    'Am besten funktioniert das bei Aenderungen bis etwa 30 Prozent.' +
+    (hatAuswahl ? ' Der ausgewaehlte Bereich kann dabei geschuetzt werden.' : '') });
+  if (!r) return;
+  if (r.w === w && r.h === h) { say('Groesse unveraendert'); return; }
+
+  // Auswahl von Dokument- in Ebenenkoordinaten bringen
+  let schutz = null;
+  if (r.schutz && state.selection) {
+    const s = state.selection;
+    const a = docToLayer(l, s.x, s.y);
+    const b = docToLayer(l, s.x + s.w, s.y + s.h);
+    schutz = { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y),
+               w: Math.abs(b.x - a.x), h: Math.abs(b.y - a.y) };
+  }
+
+  const p2 = page();
+  // Deckt die Ebene die Leinwand genau ab, wird diese mitskaliert
+  const fuelltLeinwand = l.x === 0 && l.y === 0 && l.rot === 0 && l.sx === 1 && l.sy === 1 &&
+    l.canvas.width === p2.width && l.canvas.height === p2.height;
+
+  commit('Inhaltsbasiert skalieren');
+  ensureRaster(l);
+  const fortschritt = showProgress('Inhaltsbasiert skalieren');
+  try {
+    const neu = await contentAwareResize(l.canvas, r.w, r.h, {
+      schutz,
+      signal: fortschritt.signal,
+      onProgress: (t) => fortschritt.update(t),
+    });
+    if (fuelltLeinwand) {
+      // Wer das ganze Bild skaliert, erwartet eine mitgehende Leinwand
+      l.canvas = neu;
+      l.x = 0; l.y = 0;
+      p2.width = neu.width;
+      p2.height = neu.height;
+      p2.pdfSource = null;
+      p2.pdfPoints = null;
+      fitZoom();
+    } else {
+      // Sonst bleibt die Bildmitte stehen, damit die Ebene nicht springt
+      const mx = l.x + (l.canvas.width * l.sx) / 2;
+      const my = l.y + (l.canvas.height * l.sy) / 2;
+      l.canvas = neu;
+      l.x = mx - (neu.width * l.sx) / 2;
+      l.y = my - (neu.height * l.sy) / 2;
+    }
+    notify();
+    say(`Inhaltsbasiert skaliert: ${w}x${h} auf ${neu.width}x${neu.height}`);
+  } catch (err) {
+    undo();
+    notify();
+    say(err.message === 'abgebrochen' ? 'Abgebrochen – die Ebene bleibt unveraendert'
+                                      : 'Fehlgeschlagen: ' + err.message);
+  } finally {
+    fortschritt.close();
+  }
 }
 
 /* ---------------- Projektdatei ---------------- */
@@ -360,12 +477,19 @@ export async function run(cmd) {
       const copy = createLayer({ name: l.name + ' Kopie', type: l.type });
       Object.assign(copy, {
         visible: l.visible, opacity: l.opacity, blend: l.blend,
-        x: l.x + 12, y: l.y + 12, rot: l.rot, sx: l.sx, sy: l.sy,
+        // Deckungsgleich wie in anderen Editoren: kein Versatz, sonst
+        // ragt die Kopie ueber die Leinwand und verliert dort Inhalt.
+        x: l.x, y: l.y, rot: l.rot, sx: l.sx, sy: l.sy,
         adjust: { ...l.adjust }, text: l.text ? { ...l.text } : null,
-        shape: l.shape ? { ...l.shape } : null, canvas: cloneCanvas(l.canvas),
+        shape: l.shape ? { ...l.shape } : null,
+        // Die Bilddaten werden geteilt; beginPixelEdit legt vor der ersten
+        // Pixelaenderung automatisch eine eigene Kopie an.
+        canvas: l.canvas,
       });
+      copy.pdfBase = false;
       addLayer(copy);
       notify();
+      say('Ebene dupliziert (deckungsgleich)');
       break;
     }
     case 'delete-layer': {
@@ -397,6 +521,8 @@ export async function run(cmd) {
       break;
     }
     case 'select-none': state.selection = null; clearCrop(); notify(); break;
+    case 'canvas-to-content': canvasToContent(); break;
+    case 'content-aware-scale': await contentAwareDialog(); break;
     case 'crop-to-selection': {
       const r = getCropRect() || state.selection;
       if (!r) { say('Erst einen Bereich auswählen'); break; }
@@ -487,12 +613,11 @@ export async function run(cmd) {
       commit('Anpassungen einrechnen');
       ensureRaster(l);
       const res = F.bakeAdjust(l.canvas, l.adjust);
-      if (res.canvas) {
-        l.canvas = res.canvas;
-        l.x -= res.offset * l.sx;
-        l.y -= res.offset * l.sy;
-        l.adjust = res.adjust;
-      }
+      if (!res.veraendert) { say('Diese Ebene hat keine Anpassungen'); break; }
+      l.canvas = res.canvas;
+      l.x -= res.offset * l.sx;
+      l.y -= res.offset * l.sy;
+      l.adjust = res.adjust;
       notify();
       say('Anpassungen sind jetzt Teil der Pixel');
       break;

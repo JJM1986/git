@@ -21,6 +21,29 @@ export const ADJUSTMENTS = [
   { key: 'invert',     label: 'Invertieren',min: 0, max: 100, def: 0, unit: '%' },
 ];
 
+/* Browser-Grenzen fuer Canvas. Darueber liefert Chrome leere Flaechen,
+   statt einen Fehler zu melden - deshalb halten wir bewusst Abstand. */
+export const MAX_EDGE = 16384;
+export const MAX_AREA = 200e6;
+
+/** Groesste erlaubte Vergroesserung, bei der die Buehne noch gezeichnet wird. */
+export function maxZoomFor(p, hardLimit = 16) {
+  if (!p) return hardLimit;
+  return Math.max(0.02, Math.min(
+    hardLimit,
+    MAX_EDGE / p.width,
+    MAX_EDGE / p.height,
+    Math.sqrt(MAX_AREA / (p.width * p.height)),
+  ));
+}
+
+/** Passt eine gewuenschte Canvasgroesse in die Browsergrenzen ein. */
+export function fitCanvasSize(w, h) {
+  let s = Math.min(1, MAX_EDGE / w, MAX_EDGE / h, Math.sqrt(MAX_AREA / (w * h)));
+  if (!isFinite(s) || s <= 0) s = 1;
+  return { w: Math.max(1, Math.floor(w * s)), h: Math.max(1, Math.floor(h * s)), scale: s };
+}
+
 let uid = 1;
 export const newId = () => 'id' + (uid++);
 
@@ -30,10 +53,10 @@ export const state = {
   active: 0,
   zoom: 1,
   tool: 'move',
-  fg: '#1a1a1a',
+  fg: '#373639',   // EFCO Anthrazitgrau
   bg: '#ffffff',
   selection: null,       // {x,y,w,h} in Dokumentkoordinaten
-  recentColors: [],
+  recentColors: ['#ede813', '#3d4d54', '#373639', '#54434a', '#565442', '#ffffff'],
   sourcePdfBytes: null,  // Original-PDF für den verlustarmen Export
   dirty: false,
 };
@@ -189,16 +212,32 @@ export function hitLayer(layer, px, py) {
   return p.x >= 0 && p.y >= 0 && p.x < layer.canvas.width && p.y < layer.canvas.height;
 }
 
+/** Umschliessender Rahmen mehrerer Ebenen, optional samt Leinwand. */
+export function unionBounds(list, withPage = null) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const l of list) {
+    const b = layerBBox(l);
+    x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+    x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+  }
+  if (withPage) {
+    x0 = Math.min(x0, 0); y0 = Math.min(y0, 0);
+    x1 = Math.max(x1, withPage.width); y1 = Math.max(y1, withPage.height);
+  }
+  if (!isFinite(x0)) return { x: 0, y: 0, w: 1, h: 1 };
+  return { x: Math.floor(x0), y: Math.floor(y0), w: Math.ceil(x1 - x0), h: Math.ceil(y1 - y0) };
+}
+
 /* ---------------- Text & Formen rastern ---------------- */
 
 export function defaultText(content = 'Text') {
   return {
     content,
-    family: 'system-ui, sans-serif',
+    family: '"Panton", Arial, Helvetica, sans-serif',
     size: 64,
     weight: '400',
     italic: false,
-    color: '#1a1a1a',
+    color: '#373639',
     stroke: '#ffffff',
     strokeWidth: 0,
     align: 'left',

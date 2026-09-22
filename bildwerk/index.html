@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bildwerk – Lokaler Bild- &amp; PDF-Editor</title>
 <link rel="stylesheet" href="css/app.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232d7ff9'/><path d='M8 22l6-9 4 5 3-4 3 8z' fill='%23fff'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%233d4d54'/><circle cx='16' cy='16' r='7' fill='%23ede813'/></svg>">
 </head>
 <body>
 
@@ -43,8 +43,10 @@
         <button data-cmd="select-none">Auswahl aufheben<kbd>Strg D</kbd></button>
         <hr>
         <button data-cmd="crop-to-selection">Auf Auswahl zuschneiden</button>
+        <button data-cmd="canvas-to-content">Leinwand auf Inhalt erweitern</button>
         <button data-cmd="resize-doc">Dokumentgröße…</button>
         <button data-cmd="resize-image">Bildgröße skalieren…</button>
+        <button data-cmd="content-aware-scale">Inhaltsbasiert skalieren…</button>
       </div>
     </div>
 
@@ -130,6 +132,14 @@
         <canvas id="canvas"></canvas>
         <canvas id="overlay"></canvas>
       </div>
+      <div class="progress-box" id="progress" hidden>
+        <div class="progress-title" id="progress-title">Arbeitet…</div>
+        <div class="progress-bar"><span id="progress-fill"></span></div>
+        <div class="progress-foot">
+          <span id="progress-pct">0 %</span>
+          <button class="btn" id="progress-cancel">Abbrechen</button>
+        </div>
+      </div>
     </div>
     <div class="pagestrip" id="pagestrip" hidden></div>
   </section>
@@ -140,7 +150,7 @@
       <div class="colors">
         <label class="swatch-label">
           <span>Vordergrund</span>
-          <input type="color" id="fg-color" value="#1a1a1a">
+          <input type="color" id="fg-color" value="#373639">
         </label>
         <label class="swatch-label">
           <span>Hintergrund</span>
@@ -175,7 +185,7 @@
         <div class="field"><label>Ausrichtung</label>
           <select id="t-align"><option value="left">links</option><option value="center">zentriert</option><option value="right">rechts</option></select>
         </div>
-        <div class="field"><label>Farbe</label><input type="color" id="t-color" value="#1a1a1a"></div>
+        <div class="field"><label>Farbe</label><input type="color" id="t-color" value="#373639"></div>
       </div>
       <div class="row">
         <div class="field"><label>Kontur</label><input type="color" id="t-stroke" value="#ffffff"></div>

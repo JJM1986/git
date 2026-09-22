@@ -64,7 +64,11 @@ den Zustand an.
   zurücknehmbar oder per „Anpassungen einrechnen“ festschreibbar
 - Filter: Schärfen, Kanten, Relief, Verpixeln, Rauschen, Tontrennung,
   Schwellenwert, Vignette, Auto-Tonwert, Spiegeln, Drehen
-- Dokumentgröße und Bildgröße ändern, Historie mit 40 Schritten
+- **Inhaltsbasiert skalieren** (Seam Carving): ruhige Bildbereiche geben nach,
+  Motive behalten ihre Form; ein ausgewählter Bereich lässt sich schützen,
+  Fortschritt wird angezeigt und die Rechnung lässt sich abbrechen
+- Dokumentgröße und Bildgröße ändern, Leinwand auf Inhalt erweitern,
+  Historie mit 40 Schritten
 
 **Schriften**
 - Textebenen bleiben editierbar: Inhalt, Größe, Schnitt, Zeilenhöhe,
@@ -108,6 +112,54 @@ den Zustand an.
 | Pfeiltasten | Ebene um 1 px (mit Umschalt 10 px) verschieben |
 | `Bild ↑/↓` | Seite wechseln |
 
+## Inhaltsbasiert skalieren
+
+![Original, gleichmäßig gestaucht und inhaltsbasiert im Vergleich](docs/inhaltsbasiert.png)
+
+Das Verfahren sucht wiederholt den unauffälligsten Pixelpfad durch das Bild
+und entfernt ihn (oder verdoppelt ihn beim Vergrößern). Im Beispiel bleibt der
+Kreis rund und die Schrift lesbar, während gleichmäßiges Stauchen alles
+verzerrt. Gut zu sehen ist auch die Grenze: Der graue Quader rechts bekommt
+bei 35 Prozent Stauchung eine sichtbare Einschnürung. Bis etwa 30 Prozent
+Änderung sind die Ergebnisse meist sauber; darüber lohnt es sich, den
+wichtigen Bereich vorher auszuwählen und im Dialog zu schützen.
+
+Rechenzeit auf einem normalen Rechner (die Anzeige bleibt bedienbar, Abbruch
+jederzeit möglich):
+
+| Bild | Änderung | Dauer |
+|---|---|---|
+| 800 × 600 | 80 Nahtlinien | ≈ 0,5 s |
+| 1600 × 1000 | 160 Nahtlinien | ≈ 3 s |
+| 1600 × 1000 | 400 Nahtlinien | ≈ 7 s |
+
+Die Obergrenze liegt bei 6 Megapixeln je Ebene; darüber meldet sich das
+Programm, statt minutenlang zu rechnen.
+
+## Gestaltung
+
+Farben und Schrift folgen dem **EFCO Brand Book V1.3** (Dezember 2022, Seite 19):
+
+| Rolle | Farbe | Hausfarbe |
+|---|---|---|
+| Akzent, aktive Werkzeuge, Griffe | `#ede813` | Schwefelgelb (Pantone 395C, RAL 1016) |
+| Leisten und Panels | `#3d4d54` | EFCO Anthrazit (Pantone 439C) |
+| Text auf gelber Fläche | `#373639` | Anthrazitgrau (Pantone 432C, RAL 7016) |
+| Farbfelder | `#54434a`, `#565442` | Sekundärtöne |
+
+Schrift ist die Hausschrift **Panton**; ist sie auf dem Rechner nicht
+installiert, greift **Arial** — der im Brand Book vorgesehene Ersatz für
+Office-Anwendungen. Panton ist lizenzpflichtig (myfonts) und wird deshalb
+nicht mitgeliefert.
+
+Eine Ausnahme ist bewusst gesetzt: Die Arbeitsfläche rund um das Bild bleibt
+neutralgrau. Ein farbiger Untergrund würde die Beurteilung der Bildfarben
+verfälschen. Alle Text-Hintergrund-Kombinationen der Oberfläche erreichen
+mindestens 4,8:1 und liegen damit über der Anforderung für Fließtext (4,5:1).
+
+Ein Markenwechsel betrifft einen Block: die Farbtoken in `css/app.css`.
+Die Griffe auf der Bühne lesen die Akzentfarbe zur Laufzeit von dort.
+
 ## Ehrliche Einordnung
 
 Bildwerk deckt die alltägliche Bild- und PDF-Arbeit ab, ist aber kein
@@ -115,6 +167,8 @@ Photoshop-Ersatz im vollen Funktionsumfang. Bewusst **nicht** enthalten sind
 unter anderem: freie Auswahlwerkzeuge (Lasso, Zauberstab), Ebenenmasken,
 Einstellungsebenen, Pfade und Vektorwerkzeuge, Smartobjekte, CMYK und
 Farbprofile, RAW-Entwicklung, inhaltsbasiertes Füllen sowie 16/32-Bit-Farbtiefe.
+Inhaltsbasiertes *Skalieren* ist vorhanden, arbeitet aber bis 6 Megapixel je
+Ebene — darüber wird es im Browser zu langsam und das Programm sagt es an.
 Gerechnet wird mit 8 Bit pro Kanal im sRGB-Raum des Browsers.
 
 Große Dokumente kosten Arbeitsspeicher: Jede Ebene liegt als eigenes Bild im
@@ -128,6 +182,7 @@ RAM, und die Historie hält bis zu 40 Schritte vor.
 | `js/tools.js` | Werkzeuge und Zeigerinteraktion, Anfasser |
 | `js/filters.js` | Pixeloperationen (Faltung, Flood-Fill, Tonwerte) |
 | `js/pdfio.js` | PDF lesen, Seiten verwalten, PDF schreiben |
+| `js/seamcarve.js` | Inhaltsbasiertes Skalieren (Nahtlinien-Verfahren) |
 | `js/fonts.js` | System- und eigene Schriften |
 | `js/ui.js` | Oberfläche, Panels, Dialoge |
 | `js/commands.js` | Menübefehle, Dateiein- und -ausgabe |

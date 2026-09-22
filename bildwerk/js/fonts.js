@@ -1,8 +1,10 @@
 /* Bildwerk – Schriftverwaltung: Systemschriften plus eigene Schriftdateien. */
 
 export const SYSTEM_FONTS = [
+  // Hausschrift nach EFCO Brand Book; Arial ist dort der vorgesehene Ersatz
+  ['"Panton", Arial, Helvetica, sans-serif', 'Panton (Hausschrift)'],
+  ['Arial, Helvetica, sans-serif', 'Arial (EFCO Office)'],
   ['system-ui, sans-serif', 'System (serifenlos)'],
-  ['Arial, Helvetica, sans-serif', 'Arial / Helvetica'],
   ['"Helvetica Neue", Helvetica, sans-serif', 'Helvetica Neue'],
   ['Verdana, Geneva, sans-serif', 'Verdana'],
   ['Tahoma, sans-serif', 'Tahoma'],

@@ -1,7 +1,7 @@
 /* Bildwerk – Oberfläche: Bühne, Panels, Ebenenliste, Dialoge. */
 import {
   state, page, layers, activeLayer, setActiveLayer, renderPage, BLEND_MODES,
-  ADJUSTMENTS, defaultAdjust, refreshLayer, commit, notify, on, say,
+  ADJUSTMENTS, defaultAdjust, refreshLayer, commit, notify, on, say, maxZoomFor,
 } from './core.js';
 import { TOOLS, opts, drawOverlay, pointerDown, pointerMove, pointerUp, clearCrop } from './tools.js';
 import { fontOptions } from './fonts.js';
@@ -245,7 +245,13 @@ function bindStage() {
 }
 
 export function setZoom(z) {
-  state.zoom = Math.min(16, Math.max(0.02, z));
+  // Oberhalb der Browsergrenze fuer Canvas bliebe die Buehne leer,
+  // deshalb wird die Vergroesserung an der Dokumentgroesse gedeckelt.
+  const max = maxZoomFor(page());
+  const ziel = Math.max(0.02, z);
+  if (ziel > max && state.zoom >= max - 1e-6)
+    say(`Mehr als ${Math.round(max * 100)}% laesst die Bildflaeche bei dieser Dokumentgroesse nicht zu`);
+  state.zoom = Math.min(max, ziel);
   scheduleRender();
 }
 
@@ -255,6 +261,7 @@ export function fitZoom() {
   const wrap = $('#stage-wrap');
   const pad = 52;
   setZoom(Math.min((wrap.clientWidth - pad) / p.width, (wrap.clientHeight - pad) / p.height, 4));
+  scheduleRender();
 }
 
 /* ---------------- Rendering ---------------- */
@@ -452,6 +459,29 @@ export function modal(title, fields, { okLabel = 'OK', text = '' } = {}) {
       if (e.key === 'Escape') close(null);
     };
   });
+}
+
+/** Fortschrittsanzeige ueber der Buehne; liefert update/schliessen + Abbruch. */
+export function showProgress(titel) {
+  const box = $('#progress');
+  const ctrl = new AbortController();
+  $('#progress-title').textContent = titel;
+  $('#progress-fill').style.width = '0%';
+  $('#progress-pct').textContent = '0 %';
+  $('#progress-cancel').onclick = () => {
+    ctrl.abort();
+    $('#progress-pct').textContent = 'wird abgebrochen…';
+  };
+  box.hidden = false;
+  return {
+    signal: ctrl.signal,
+    update(v) {
+      const pct = Math.round(Math.min(1, Math.max(0, v)) * 100);
+      $('#progress-fill').style.width = pct + '%';
+      if (!ctrl.signal.aborted) $('#progress-pct').textContent = pct + ' %';
+    },
+    close() { box.hidden = true; $('#progress-cancel').onclick = null; },
+  };
 }
 
 export function info(title, html) {

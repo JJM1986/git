@@ -1,7 +1,30 @@
+/* Farben und Schrift nach EFCO Brand Book V1.3 (Dezember 2022), Seite 19.
+   Hausfarben:  Schwefelgelb  #ede813  (Pantone 395C, RAL 1016)
+                EFCO Anthrazit #3d4d54 (Pantone 439C)
+                Anthrazitgrau  #373639 (Pantone 432C, RAL 7016)
+                Sekundaertoene #54434a und #565442, Weiss #ffffff
+   Hausschrift: Panton; fuer Office-Anwendungen Arial Regular/Bold.
+   Panton ist lizenzpflichtig (myfonts) - ist sie auf dem Rechner
+   installiert, wird sie benutzt, sonst greift Arial wie im Brand Book
+   vorgesehen. */
 :root{
-  --bg:#14161a; --bg2:#1b1e24; --bg3:#232730; --line:#30353f;
-  --fg:#e7eaf0; --fg-dim:#98a0ae; --accent:#2d7ff9; --accent-dim:#1c4f9c;
-  --danger:#e5484d; --radius:7px;
+  --efco-gelb:#ede813;
+  --efco-anthrazit:#3d4d54;
+  --efco-anthrazitgrau:#373639;
+  --efco-sekundaer-1:#54434a;
+  --efco-sekundaer-2:#565442;
+
+  --bg:#2b2a2d;                    /* Arbeitsflaeche, aus Anthrazitgrau abgedunkelt */
+  --bg2:var(--efco-anthrazit);     /* Leisten und Panels */
+  --bg3:#48595f;                   /* Eingabefelder, aus Anthrazit aufgehellt */
+  --line:#55686f;
+  --fg:#ffffff;
+  --fg-dim:#b7c3c8;
+  --accent:var(--efco-gelb);
+  --accent-dim:#b9b50f;
+  --accent-fg:var(--efco-anthrazitgrau);   /* Text auf gelber Flaeche */
+  --danger:#b5453f;
+  --radius:7px;
   --topbar-h:42px; --status-h:24px;
   font-synthesis-weight:none;
 }
@@ -10,7 +33,7 @@
 html,body{height:100%;margin:0}
 body{
   background:var(--bg); color:var(--fg);
-  font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font:13px/1.45 "Panton",Arial,Helvetica,sans-serif;
   display:flex; flex-direction:column; overflow:hidden; user-select:none;
 }
 button{font:inherit;color:inherit}
@@ -22,7 +45,8 @@ input,select,textarea{font:inherit}
   padding:0 10px; background:var(--bg2); border-bottom:1px solid var(--line);
 }
 .brand{display:flex;align-items:center;gap:7px;font-weight:600;letter-spacing:.2px}
-.brand .mark{width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg,var(--accent),#7b5cff)}
+.brand{text-transform:uppercase;letter-spacing:1.1px;font-weight:700}
+.brand .mark{width:12px;height:12px;border-radius:50%;background:var(--efco-gelb)}
 .menubar{display:flex;gap:2px}
 .menu{position:relative}
 .menu-btn{background:none;border:0;padding:6px 10px;border-radius:5px;cursor:pointer;color:var(--fg-dim)}
@@ -37,9 +61,9 @@ input,select,textarea{font:inherit}
   display:flex;justify-content:space-between;align-items:center;gap:20px;width:100%;
   background:none;border:0;text-align:left;padding:6px 9px;border-radius:5px;cursor:pointer;
 }
-.menu-pop button:hover{background:var(--accent);color:#fff}
+.menu-pop button:hover{background:var(--accent);color:var(--accent-fg)}
 .menu-pop kbd{font:11px/1 ui-monospace,monospace;color:var(--fg-dim);background:#0003;padding:3px 5px;border-radius:4px}
-.menu-pop button:hover kbd{color:#dbe6ff}
+.menu-pop button:hover kbd{color:var(--accent-fg);background:#0002}
 .menu-pop hr{border:0;border-top:1px solid var(--line);margin:5px 2px}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:4px}
 .icon-btn{background:var(--bg3);border:1px solid var(--line);border-radius:5px;width:28px;height:26px;cursor:pointer;line-height:1}
@@ -58,7 +82,7 @@ input,select,textarea{font:inherit}
   display:grid;place-items:center;font-size:15px;color:var(--fg-dim);
 }
 .tool:hover{background:var(--bg3);color:var(--fg)}
-.tool.active{background:var(--accent);color:#fff;border-color:#5b9dff}
+.tool.active{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .tools .spacer{height:8px}
 
 .workspace{flex:1 1 auto;display:flex;flex-direction:column;min-width:0;min-height:0}
@@ -72,13 +96,17 @@ input,select,textarea{font:inherit}
 .options .opt output{min-width:32px;color:var(--fg);font-variant-numeric:tabular-nums}
 
 .stage-wrap{
+  position:relative;
   flex:1 1 auto;overflow:auto;display:grid;place-items:center;padding:26px;
+  /* bewusst neutralgrau: ein farbiger Untergrund wuerde die Beurteilung
+     der Bildfarben verfaelschen */
   background:
-    linear-gradient(45deg,#0e1013 25%,transparent 25%,transparent 75%,#0e1013 75%),
-    linear-gradient(45deg,#0e1013 25%,#101318 25%,#101318 75%,#0e1013 75%);
+    linear-gradient(45deg,#1e1d20 25%,transparent 25%,transparent 75%,#1e1d20 75%),
+    linear-gradient(45deg,#1e1d20 25%,#242326 25%,#242326 75%,#1e1d20 75%);
   background-size:22px 22px; background-position:0 0,11px 11px;
 }
 .stage{position:relative;box-shadow:0 0 0 1px #000,0 18px 50px #000a;line-height:0}
+.pagethumb.active{box-shadow:0 0 0 2px var(--efco-gelb)}
 .stage canvas{display:block;position:absolute;top:0;left:0;image-rendering:auto}
 .stage #canvas{position:relative;
   background-image:
@@ -111,7 +139,7 @@ input,select,textarea{font:inherit}
 .panel{padding:9px 11px;border-bottom:1px solid var(--line)}
 .panel.grow{flex:1 1 auto;display:flex;flex-direction:column;min-height:170px}
 .panel h3{
-  margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--fg-dim);
+  margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--fg-dim);font-weight:600;
   display:flex;align-items:center;
 }
 .panel h3 .right{margin-left:auto;display:flex;gap:3px}
@@ -127,14 +155,14 @@ input[type=text],input[type=number],select,textarea{
   padding:5px 7px;width:100%;
 }
 input:focus,select:focus,textarea:focus{outline:1px solid var(--accent);border-color:var(--accent)}
-input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--efco-gelb)}
 input[type=color]{background:var(--bg3);border:1px solid var(--line);border-radius:5px;height:28px;padding:2px;cursor:pointer}
 textarea{resize:vertical;font-family:inherit}
 .check{display:flex;align-items:center;gap:6px;color:var(--fg-dim);margin:2px 0 8px;cursor:pointer}
 .btn{background:var(--bg3);border:1px solid var(--line);border-radius:5px;padding:6px 10px;cursor:pointer;flex:1}
 .btn:hover{border-color:var(--accent)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.primary:hover{background:#4a91ff}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
+.btn.primary:hover{background:#f5f03a}
 .btn.ghost{background:none}
 
 .colors{display:flex;align-items:flex-end;gap:8px}
@@ -152,7 +180,7 @@ textarea{resize:vertical;font-family:inherit}
   display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:5px;cursor:pointer;
   border:1px solid transparent;background:var(--bg3);
 }
-.layer.active{border-color:var(--accent);background:#23345080}
+.layer.active{border-color:var(--accent);background:#5c6f7780}
 .layer .eye{background:none;border:0;cursor:pointer;font-size:12px;padding:0;width:16px;color:var(--fg-dim)}
 .layer.hidden-layer{opacity:.45}
 .layer .thumb{width:30px;height:30px;flex:0 0 auto;border-radius:3px;background:#fff;
@@ -163,13 +191,25 @@ textarea{resize:vertical;font-family:inherit}
 .layer .name input{padding:2px 4px}
 .layer .badge{font-size:9px;color:var(--fg-dim);border:1px solid var(--line);border-radius:3px;padding:0 3px}
 
+.progress-box{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:40;
+  background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;min-width:300px;box-shadow:0 18px 50px #000b;
+}
+.progress-title{font-weight:600;margin-bottom:10px}
+.progress-bar{height:8px;border-radius:4px;background:var(--bg);overflow:hidden}
+.progress-bar span{display:block;height:100%;width:0;background:var(--efco-gelb);transition:width .15s linear}
+.progress-foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:14px}
+.progress-foot span{color:var(--fg-dim);font-variant-numeric:tabular-nums}
+.progress-foot .btn{flex:0 0 auto}
+
 /* ---------- Status ---------- */
 .statusbar{
   height:var(--status-h);flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:0 12px;
   background:var(--bg2);border-top:1px solid var(--line);color:var(--fg-dim);font-size:11px;
 }
 .statusbar .grow{flex:1}
-.lib-state.ok{color:#3ecf8e}
+.lib-state.ok{color:var(--efco-gelb)}
 .lib-state.warn{color:#e5a13a}
 
 /* ---------- Modal ---------- */

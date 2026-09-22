@@ -18,8 +18,24 @@ import pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 # Reihenfolge entspricht der Abhaengigkeit der Module untereinander.
-MODULES = ['core.js', 'filters.js', 'fonts.js', 'tools.js', 'pdfio.js',
-           'ui.js', 'commands.js', 'main.js']
+MODULES = ['core.js', 'filters.js', 'seamcarve.js', 'fonts.js', 'tools.js',
+           'pdfio.js', 'ui.js', 'commands.js', 'main.js']
+
+# vendorloader.js wird als klassisches Skript eingebunden, nicht gebuendelt.
+NICHT_GEBUENDELT = {'vendorloader.js'}
+
+
+def pruefe_vollstaendigkeit() -> None:
+    """Jede Moduldatei muss in MODULES stehen. Fehlt eine, waere sie in der
+    Einzeldatei nicht enthalten und der Fehler fiele erst beim Benutzen auf."""
+    vorhanden = {f.name for f in (ROOT / 'js').glob('*.js')}
+    fehlend = sorted(vorhanden - set(MODULES) - NICHT_GEBUENDELT)
+    unbekannt = sorted(set(MODULES) - vorhanden)
+    if fehlend:
+        sys.exit('nicht in MODULES eingetragen: ' + ', '.join(fehlend) +
+                 '\nbitte in tools/build-standalone.py nach Abhaengigkeit ergaenzen')
+    if unbekannt:
+        sys.exit('in MODULES gelistet, aber nicht vorhanden: ' + ', '.join(unbekannt))
 
 # Statt der Namensraum-Importe (import * as F) im gebuendelten Code:
 NAMESPACES = """
@@ -95,6 +111,7 @@ EMBED_INIT = """/* Bildwerk: eingebettete Bibliotheken bereitstellen */
 
 
 def main() -> None:
+    pruefe_vollstaendigkeit()
     embed = '--embed' in sys.argv[1:]
     html = (ROOT / 'index.html').read_text(encoding='utf-8')
     css = (ROOT / 'css' / 'app.css').read_text(encoding='utf-8')
