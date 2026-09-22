@@ -1,0 +1,3 @@
+# Fremdbibliotheken werden mit vendor/get-libs.sh geholt
+vendor/*.js
+!vendor/get-libs.sh

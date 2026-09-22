@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bildwerk – Lokaler Bild- &amp; PDF-Editor</title>
+<link rel="stylesheet" href="css/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232d7ff9'/><path d='M8 22l6-9 4 5 3-4 3 8z' fill='%23fff'/></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="mark"></span> Bildwerk</div>
+
+  <nav class="menubar">
+    <div class="menu">
+      <button class="menu-btn" data-menu="file">Datei</button>
+      <div class="menu-pop" data-pop="file">
+        <button data-cmd="new">Neues Dokument…<kbd>Strg N</kbd></button>
+        <button data-cmd="open-image">Bild öffnen…<kbd>Strg O</kbd></button>
+        <button data-cmd="place-image">Bild als Ebene einfügen…</button>
+        <button data-cmd="open-pdf">PDF öffnen…</button>
+        <hr>
+        <button data-cmd="save-project">Projekt speichern (.bildwerk)<kbd>Strg S</kbd></button>
+        <button data-cmd="open-project">Projekt laden…</button>
+        <hr>
+        <button data-cmd="export-png">Export PNG<kbd>Strg E</kbd></button>
+        <button data-cmd="export-jpg">Export JPEG…</button>
+        <button data-cmd="export-webp">Export WebP</button>
+        <button data-cmd="export-pdf">Export PDF…</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="edit">Bearbeiten</button>
+      <div class="menu-pop" data-pop="edit">
+        <button data-cmd="undo">Rückgängig<kbd>Strg Z</kbd></button>
+        <button data-cmd="redo">Wiederholen<kbd>Strg Y</kbd></button>
+        <hr>
+        <button data-cmd="copy-layer">Ebene duplizieren<kbd>Strg J</kbd></button>
+        <button data-cmd="delete-layer">Ebene löschen</button>
+        <button data-cmd="clear-selection">Auswahl leeren<kbd>Entf</kbd></button>
+        <button data-cmd="select-none">Auswahl aufheben<kbd>Strg D</kbd></button>
+        <hr>
+        <button data-cmd="crop-to-selection">Auf Auswahl zuschneiden</button>
+        <button data-cmd="resize-doc">Dokumentgröße…</button>
+        <button data-cmd="resize-image">Bildgröße skalieren…</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="layer">Ebene</button>
+      <div class="menu-pop" data-pop="layer">
+        <button data-cmd="add-layer">Neue leere Ebene</button>
+        <button data-cmd="add-text">Neue Textebene</button>
+        <button data-cmd="merge-down">Mit darunter vereinen</button>
+        <button data-cmd="flatten">Auf Hintergrund reduzieren</button>
+        <hr>
+        <button data-cmd="layer-up">Nach oben</button>
+        <button data-cmd="layer-down">Nach unten</button>
+        <hr>
+        <button data-cmd="fit-layer">Ebene einpassen</button>
+        <button data-cmd="reset-transform">Transformation zurücksetzen</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="filter">Filter</button>
+      <div class="menu-pop" data-pop="filter">
+        <button data-cmd="bake-adjust">Anpassungen einrechnen</button>
+        <hr>
+        <button data-cmd="fx-sharpen">Schärfen</button>
+        <button data-cmd="fx-edge">Kanten betonen</button>
+        <button data-cmd="fx-emboss">Relief</button>
+        <button data-cmd="fx-pixelate">Verpixeln…</button>
+        <button data-cmd="fx-noise">Rauschen…</button>
+        <button data-cmd="fx-posterize">Tontrennung…</button>
+        <button data-cmd="fx-threshold">Schwellenwert…</button>
+        <button data-cmd="fx-vignette">Vignette</button>
+        <hr>
+        <button data-cmd="fx-autolevel">Auto-Tonwert</button>
+        <button data-cmd="fx-flip-h">Horizontal spiegeln</button>
+        <button data-cmd="fx-flip-v">Vertikal spiegeln</button>
+        <button data-cmd="fx-rot90">90° drehen</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="pdf">PDF</button>
+      <div class="menu-pop" data-pop="pdf">
+        <button data-cmd="open-pdf">PDF öffnen…</button>
+        <button data-cmd="pdf-append">PDF anhängen (zusammenführen)…</button>
+        <hr>
+        <button data-cmd="page-add">Leere Seite anhängen</button>
+        <button data-cmd="page-dup">Seite duplizieren</button>
+        <button data-cmd="page-del">Seite löschen</button>
+        <button data-cmd="page-rot">Seite 90° drehen</button>
+        <hr>
+        <button data-cmd="export-pdf">Als PDF exportieren…</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="help">Hilfe</button>
+      <div class="menu-pop" data-pop="help">
+        <button data-cmd="shortcuts">Tastenkürzel</button>
+        <button data-cmd="about">Über Bildwerk</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="topbar-right">
+    <button class="icon-btn" data-cmd="undo" title="Rückgängig (Strg+Z)">↶</button>
+    <button class="icon-btn" data-cmd="redo" title="Wiederholen (Strg+Y)">↷</button>
+    <span class="sep"></span>
+    <button class="icon-btn" data-cmd="zoom-out" title="Verkleinern">−</button>
+    <span id="zoom-label" class="zoom-label">100%</span>
+    <button class="icon-btn" data-cmd="zoom-in" title="Vergrößern">+</button>
+    <button class="icon-btn" data-cmd="zoom-fit" title="Einpassen">⤢</button>
+  </div>
+</header>
+
+<main class="app">
+  <aside class="tools" id="toolbar"></aside>
+
+  <section class="workspace">
+    <div class="options" id="tool-options"></div>
+    <div class="stage-wrap" id="stage-wrap">
+      <div class="stage" id="stage">
+        <canvas id="canvas"></canvas>
+        <canvas id="overlay"></canvas>
+      </div>
+    </div>
+    <div class="pagestrip" id="pagestrip" hidden></div>
+  </section>
+
+  <aside class="panels">
+    <div class="panel">
+      <h3>Farben</h3>
+      <div class="colors">
+        <label class="swatch-label">
+          <span>Vordergrund</span>
+          <input type="color" id="fg-color" value="#1a1a1a">
+        </label>
+        <label class="swatch-label">
+          <span>Hintergrund</span>
+          <input type="color" id="bg-color" value="#ffffff">
+        </label>
+        <button class="mini" data-cmd="swap-colors" title="Tauschen (X)">⇄</button>
+      </div>
+      <div class="recent-colors" id="recent-colors"></div>
+    </div>
+
+    <div class="panel" id="panel-text" hidden>
+      <h3>Schrift</h3>
+      <div class="field"><label>Text</label><textarea id="t-content" rows="3"></textarea></div>
+      <div class="field"><label>Schriftart</label><select id="t-family"></select></div>
+      <div class="row">
+        <div class="field"><label>Größe</label><input type="number" id="t-size" min="4" max="800" value="64"></div>
+        <div class="field"><label>Schnitt</label>
+          <select id="t-weight">
+            <option value="300">Leicht</option>
+            <option value="400" selected>Normal</option>
+            <option value="600">Halbfett</option>
+            <option value="700">Fett</option>
+            <option value="900">Schwarz</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Zeilenhöhe</label><input type="number" id="t-line" step="0.05" min="0.5" max="4" value="1.2"></div>
+        <div class="field"><label>Laufweite</label><input type="number" id="t-spacing" step="0.5" min="-20" max="80" value="0"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Ausrichtung</label>
+          <select id="t-align"><option value="left">links</option><option value="center">zentriert</option><option value="right">rechts</option></select>
+        </div>
+        <div class="field"><label>Farbe</label><input type="color" id="t-color" value="#1a1a1a"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Kontur</label><input type="color" id="t-stroke" value="#ffffff"></div>
+        <div class="field"><label>Konturstärke</label><input type="number" id="t-strokew" min="0" max="40" step="0.5" value="0"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="t-italic"> Kursiv</label>
+      <div class="row">
+        <button class="btn" data-cmd="load-font">Schriftdatei laden…</button>
+        <button class="btn" data-cmd="rasterize-text">Rastern</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Anpassungen <button class="mini right" data-cmd="reset-adjust" title="Zurücksetzen">⟲</button></h3>
+      <div id="adjust-list"></div>
+    </div>
+
+    <div class="panel grow">
+      <h3>Ebenen
+        <span class="right">
+          <button class="mini" data-cmd="add-layer" title="Neue Ebene">+</button>
+          <button class="mini" data-cmd="copy-layer" title="Duplizieren">⧉</button>
+          <button class="mini" data-cmd="delete-layer" title="Löschen">🗑</button>
+        </span>
+      </h3>
+      <div class="row layer-props">
+        <div class="field"><label>Deckkraft <span id="op-val">100%</span></label>
+          <input type="range" id="l-opacity" min="0" max="100" value="100"></div>
+      </div>
+      <div class="field"><label>Modus</label><select id="l-blend"></select></div>
+      <div class="layer-list" id="layer-list"></div>
+    </div>
+  </aside>
+</main>
+
+<footer class="statusbar">
+  <span id="status-doc">–</span>
+  <span id="status-pos"></span>
+  <span id="status-msg" class="grow"></span>
+  <span id="status-lib" class="lib-state"></span>
+</footer>
+
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="modal">
+    <h2 id="modal-title">Titel</h2>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="modal-cancel">Abbrechen</button>
+      <button class="btn primary" id="modal-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" hidden>
+
+<script src="js/vendorloader.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

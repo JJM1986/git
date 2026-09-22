@@ -1,0 +1,3021 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bildwerk – Lokaler Bild- &amp; PDF-Editor</title>
+<style>
+:root{
+  --bg:#14161a; --bg2:#1b1e24; --bg3:#232730; --line:#30353f;
+  --fg:#e7eaf0; --fg-dim:#98a0ae; --accent:#2d7ff9; --accent-dim:#1c4f9c;
+  --danger:#e5484d; --radius:7px;
+  --topbar-h:42px; --status-h:24px;
+  font-synthesis-weight:none;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%;margin:0}
+body{
+  background:var(--bg); color:var(--fg);
+  font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:flex; flex-direction:column; overflow:hidden; user-select:none;
+}
+button{font:inherit;color:inherit}
+input,select,textarea{font:inherit}
+
+/* ---------- Topbar ---------- */
+.topbar{
+  height:var(--topbar-h); flex:0 0 auto; display:flex; align-items:center; gap:14px;
+  padding:0 10px; background:var(--bg2); border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:7px;font-weight:600;letter-spacing:.2px}
+.brand .mark{width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg,var(--accent),#7b5cff)}
+.menubar{display:flex;gap:2px}
+.menu{position:relative}
+.menu-btn{background:none;border:0;padding:6px 10px;border-radius:5px;cursor:pointer;color:var(--fg-dim)}
+.menu-btn:hover,.menu.open .menu-btn{background:var(--bg3);color:var(--fg)}
+.menu-pop{
+  position:absolute; top:100%; left:0; min-width:260px; z-index:60;
+  background:var(--bg3); border:1px solid var(--line); border-radius:var(--radius);
+  padding:5px; display:none; box-shadow:0 12px 34px #0009;
+}
+.menu.open .menu-pop{display:block}
+.menu-pop button{
+  display:flex;justify-content:space-between;align-items:center;gap:20px;width:100%;
+  background:none;border:0;text-align:left;padding:6px 9px;border-radius:5px;cursor:pointer;
+}
+.menu-pop button:hover{background:var(--accent);color:#fff}
+.menu-pop kbd{font:11px/1 ui-monospace,monospace;color:var(--fg-dim);background:#0003;padding:3px 5px;border-radius:4px}
+.menu-pop button:hover kbd{color:#dbe6ff}
+.menu-pop hr{border:0;border-top:1px solid var(--line);margin:5px 2px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:4px}
+.icon-btn{background:var(--bg3);border:1px solid var(--line);border-radius:5px;width:28px;height:26px;cursor:pointer;line-height:1}
+.icon-btn:hover{border-color:var(--accent)}
+.zoom-label{min-width:52px;text-align:center;color:var(--fg-dim);font-variant-numeric:tabular-nums}
+.sep{width:1px;height:18px;background:var(--line);margin:0 4px}
+
+/* ---------- Layout ---------- */
+.app{flex:1 1 auto;display:flex;min-height:0}
+.tools{
+  width:46px;flex:0 0 46px;background:var(--bg2);border-right:1px solid var(--line);
+  padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:3px;overflow-y:auto;
+}
+.tool{
+  width:34px;height:34px;border-radius:6px;border:1px solid transparent;background:none;cursor:pointer;
+  display:grid;place-items:center;font-size:15px;color:var(--fg-dim);
+}
+.tool:hover{background:var(--bg3);color:var(--fg)}
+.tool.active{background:var(--accent);color:#fff;border-color:#5b9dff}
+.tools .spacer{height:8px}
+
+.workspace{flex:1 1 auto;display:flex;flex-direction:column;min-width:0;min-height:0}
+.options{
+  flex:0 0 auto;min-height:36px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:4px 12px;background:var(--bg2);border-bottom:1px solid var(--line);
+}
+.options .opt{display:flex;align-items:center;gap:6px;color:var(--fg-dim)}
+.options .opt input[type=range]{width:110px}
+.options .opt input[type=number]{width:62px}
+.options .opt output{min-width:32px;color:var(--fg);font-variant-numeric:tabular-nums}
+
+.stage-wrap{
+  flex:1 1 auto;overflow:auto;display:grid;place-items:center;padding:26px;
+  background:
+    linear-gradient(45deg,#0e1013 25%,transparent 25%,transparent 75%,#0e1013 75%),
+    linear-gradient(45deg,#0e1013 25%,#101318 25%,#101318 75%,#0e1013 75%);
+  background-size:22px 22px; background-position:0 0,11px 11px;
+}
+.stage{position:relative;box-shadow:0 0 0 1px #000,0 18px 50px #000a;line-height:0}
+.stage canvas{display:block;position:absolute;top:0;left:0;image-rendering:auto}
+.stage #canvas{position:relative;
+  background-image:
+    linear-gradient(45deg,#c8c8c8 25%,transparent 25%,transparent 75%,#c8c8c8 75%),
+    linear-gradient(45deg,#c8c8c8 25%,#efefef 25%,#efefef 75%,#c8c8c8 75%);
+  background-size:16px 16px;background-position:0 0,8px 8px;
+}
+.stage #overlay{pointer-events:none}
+
+.pagestrip{
+  flex:0 0 auto;display:flex;gap:8px;padding:8px 10px;overflow-x:auto;
+  background:var(--bg2);border-top:1px solid var(--line);
+}
+.pagethumb{
+  position:relative;flex:0 0 auto;border:2px solid var(--line);border-radius:5px;cursor:pointer;
+  background:#fff;padding:0;line-height:0;
+}
+.pagethumb.active{border-color:var(--accent)}
+.pagethumb canvas{width:62px;height:auto;display:block;border-radius:3px}
+.pagethumb span{
+  position:absolute;bottom:2px;right:3px;font-size:10px;background:#000a;color:#fff;
+  padding:0 4px;border-radius:3px;line-height:14px;
+}
+
+/* ---------- Panels ---------- */
+.panels{
+  width:282px;flex:0 0 282px;background:var(--bg2);border-left:1px solid var(--line);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.panel{padding:9px 11px;border-bottom:1px solid var(--line)}
+.panel.grow{flex:1 1 auto;display:flex;flex-direction:column;min-height:170px}
+.panel h3{
+  margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--fg-dim);
+  display:flex;align-items:center;
+}
+.panel h3 .right{margin-left:auto;display:flex;gap:3px}
+.mini{background:var(--bg3);border:1px solid var(--line);border-radius:4px;cursor:pointer;
+  width:22px;height:20px;line-height:1;font-size:11px;padding:0}
+.mini:hover{border-color:var(--accent)}
+.mini.right{margin-left:auto}
+.field{display:flex;flex-direction:column;gap:3px;margin-bottom:7px;flex:1;min-width:0}
+.field label{font-size:11px;color:var(--fg-dim);display:flex;justify-content:space-between}
+.row{display:flex;gap:8px}
+input[type=text],input[type=number],select,textarea{
+  background:var(--bg3);border:1px solid var(--line);border-radius:5px;color:var(--fg);
+  padding:5px 7px;width:100%;
+}
+input:focus,select:focus,textarea:focus{outline:1px solid var(--accent);border-color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=color]{background:var(--bg3);border:1px solid var(--line);border-radius:5px;height:28px;padding:2px;cursor:pointer}
+textarea{resize:vertical;font-family:inherit}
+.check{display:flex;align-items:center;gap:6px;color:var(--fg-dim);margin:2px 0 8px;cursor:pointer}
+.btn{background:var(--bg3);border:1px solid var(--line);border-radius:5px;padding:6px 10px;cursor:pointer;flex:1}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#4a91ff}
+.btn.ghost{background:none}
+
+.colors{display:flex;align-items:flex-end;gap:8px}
+.swatch-label{flex:1;display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--fg-dim)}
+.recent-colors{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.recent-colors button{width:17px;height:17px;border-radius:4px;border:1px solid #0006;cursor:pointer;padding:0}
+
+.adjust-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.adjust-row label{width:74px;font-size:11px;color:var(--fg-dim);flex:0 0 auto}
+.adjust-row input{flex:1}
+.adjust-row output{width:38px;text-align:right;font-variant-numeric:tabular-nums;font-size:11px}
+
+.layer-list{flex:1 1 auto;overflow-y:auto;margin-top:6px;display:flex;flex-direction:column;gap:3px}
+.layer{
+  display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:5px;cursor:pointer;
+  border:1px solid transparent;background:var(--bg3);
+}
+.layer.active{border-color:var(--accent);background:#23345080}
+.layer .eye{background:none;border:0;cursor:pointer;font-size:12px;padding:0;width:16px;color:var(--fg-dim)}
+.layer.hidden-layer{opacity:.45}
+.layer .thumb{width:30px;height:30px;flex:0 0 auto;border-radius:3px;background:#fff;
+  background-image:linear-gradient(45deg,#ccc 25%,transparent 25%,transparent 75%,#ccc 75%),
+    linear-gradient(45deg,#ccc 25%,#fff 25%,#fff 75%,#ccc 75%);
+  background-size:10px 10px;background-position:0 0,5px 5px;object-fit:contain}
+.layer .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.layer .name input{padding:2px 4px}
+.layer .badge{font-size:9px;color:var(--fg-dim);border:1px solid var(--line);border-radius:3px;padding:0 3px}
+
+/* ---------- Status ---------- */
+.statusbar{
+  height:var(--status-h);flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:0 12px;
+  background:var(--bg2);border-top:1px solid var(--line);color:var(--fg-dim);font-size:11px;
+}
+.statusbar .grow{flex:1}
+.lib-state.ok{color:#3ecf8e}
+.lib-state.warn{color:#e5a13a}
+
+/* ---------- Modal ---------- */
+.modal-backdrop{position:fixed;inset:0;background:#000a;display:grid;place-items:center;z-index:100}
+.modal{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:18px;
+  min-width:340px;max-width:560px;max-height:82vh;overflow:auto;box-shadow:0 22px 70px #000b}
+.modal h2{margin:0 0 12px;font-size:15px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.modal-actions .btn{flex:0 0 auto;min-width:92px}
+.modal table{width:100%;border-collapse:collapse}
+.modal td{padding:3px 6px;border-bottom:1px solid var(--line)}
+.modal td:first-child{color:var(--fg-dim);white-space:nowrap}
+.modal p{color:var(--fg-dim);line-height:1.6}
+
+</style>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232d7ff9'/><path d='M8 22l6-9 4 5 3-4 3 8z' fill='%23fff'/></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="mark"></span> Bildwerk</div>
+
+  <nav class="menubar">
+    <div class="menu">
+      <button class="menu-btn" data-menu="file">Datei</button>
+      <div class="menu-pop" data-pop="file">
+        <button data-cmd="new">Neues Dokument…<kbd>Strg N</kbd></button>
+        <button data-cmd="open-image">Bild öffnen…<kbd>Strg O</kbd></button>
+        <button data-cmd="place-image">Bild als Ebene einfügen…</button>
+        <button data-cmd="open-pdf">PDF öffnen…</button>
+        <hr>
+        <button data-cmd="save-project">Projekt speichern (.bildwerk)<kbd>Strg S</kbd></button>
+        <button data-cmd="open-project">Projekt laden…</button>
+        <hr>
+        <button data-cmd="export-png">Export PNG<kbd>Strg E</kbd></button>
+        <button data-cmd="export-jpg">Export JPEG…</button>
+        <button data-cmd="export-webp">Export WebP</button>
+        <button data-cmd="export-pdf">Export PDF…</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="edit">Bearbeiten</button>
+      <div class="menu-pop" data-pop="edit">
+        <button data-cmd="undo">Rückgängig<kbd>Strg Z</kbd></button>
+        <button data-cmd="redo">Wiederholen<kbd>Strg Y</kbd></button>
+        <hr>
+        <button data-cmd="copy-layer">Ebene duplizieren<kbd>Strg J</kbd></button>
+        <button data-cmd="delete-layer">Ebene löschen</button>
+        <button data-cmd="clear-selection">Auswahl leeren<kbd>Entf</kbd></button>
+        <button data-cmd="select-none">Auswahl aufheben<kbd>Strg D</kbd></button>
+        <hr>
+        <button data-cmd="crop-to-selection">Auf Auswahl zuschneiden</button>
+        <button data-cmd="resize-doc">Dokumentgröße…</button>
+        <button data-cmd="resize-image">Bildgröße skalieren…</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="layer">Ebene</button>
+      <div class="menu-pop" data-pop="layer">
+        <button data-cmd="add-layer">Neue leere Ebene</button>
+        <button data-cmd="add-text">Neue Textebene</button>
+        <button data-cmd="merge-down">Mit darunter vereinen</button>
+        <button data-cmd="flatten">Auf Hintergrund reduzieren</button>
+        <hr>
+        <button data-cmd="layer-up">Nach oben</button>
+        <button data-cmd="layer-down">Nach unten</button>
+        <hr>
+        <button data-cmd="fit-layer">Ebene einpassen</button>
+        <button data-cmd="reset-transform">Transformation zurücksetzen</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="filter">Filter</button>
+      <div class="menu-pop" data-pop="filter">
+        <button data-cmd="bake-adjust">Anpassungen einrechnen</button>
+        <hr>
+        <button data-cmd="fx-sharpen">Schärfen</button>
+        <button data-cmd="fx-edge">Kanten betonen</button>
+        <button data-cmd="fx-emboss">Relief</button>
+        <button data-cmd="fx-pixelate">Verpixeln…</button>
+        <button data-cmd="fx-noise">Rauschen…</button>
+        <button data-cmd="fx-posterize">Tontrennung…</button>
+        <button data-cmd="fx-threshold">Schwellenwert…</button>
+        <button data-cmd="fx-vignette">Vignette</button>
+        <hr>
+        <button data-cmd="fx-autolevel">Auto-Tonwert</button>
+        <button data-cmd="fx-flip-h">Horizontal spiegeln</button>
+        <button data-cmd="fx-flip-v">Vertikal spiegeln</button>
+        <button data-cmd="fx-rot90">90° drehen</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="pdf">PDF</button>
+      <div class="menu-pop" data-pop="pdf">
+        <button data-cmd="open-pdf">PDF öffnen…</button>
+        <button data-cmd="pdf-append">PDF anhängen (zusammenführen)…</button>
+        <hr>
+        <button data-cmd="page-add">Leere Seite anhängen</button>
+        <button data-cmd="page-dup">Seite duplizieren</button>
+        <button data-cmd="page-del">Seite löschen</button>
+        <button data-cmd="page-rot">Seite 90° drehen</button>
+        <hr>
+        <button data-cmd="export-pdf">Als PDF exportieren…</button>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="menu-btn" data-menu="help">Hilfe</button>
+      <div class="menu-pop" data-pop="help">
+        <button data-cmd="shortcuts">Tastenkürzel</button>
+        <button data-cmd="about">Über Bildwerk</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="topbar-right">
+    <button class="icon-btn" data-cmd="undo" title="Rückgängig (Strg+Z)">↶</button>
+    <button class="icon-btn" data-cmd="redo" title="Wiederholen (Strg+Y)">↷</button>
+    <span class="sep"></span>
+    <button class="icon-btn" data-cmd="zoom-out" title="Verkleinern">−</button>
+    <span id="zoom-label" class="zoom-label">100%</span>
+    <button class="icon-btn" data-cmd="zoom-in" title="Vergrößern">+</button>
+    <button class="icon-btn" data-cmd="zoom-fit" title="Einpassen">⤢</button>
+  </div>
+</header>
+
+<main class="app">
+  <aside class="tools" id="toolbar"></aside>
+
+  <section class="workspace">
+    <div class="options" id="tool-options"></div>
+    <div class="stage-wrap" id="stage-wrap">
+      <div class="stage" id="stage">
+        <canvas id="canvas"></canvas>
+        <canvas id="overlay"></canvas>
+      </div>
+    </div>
+    <div class="pagestrip" id="pagestrip" hidden></div>
+  </section>
+
+  <aside class="panels">
+    <div class="panel">
+      <h3>Farben</h3>
+      <div class="colors">
+        <label class="swatch-label">
+          <span>Vordergrund</span>
+          <input type="color" id="fg-color" value="#1a1a1a">
+        </label>
+        <label class="swatch-label">
+          <span>Hintergrund</span>
+          <input type="color" id="bg-color" value="#ffffff">
+        </label>
+        <button class="mini" data-cmd="swap-colors" title="Tauschen (X)">⇄</button>
+      </div>
+      <div class="recent-colors" id="recent-colors"></div>
+    </div>
+
+    <div class="panel" id="panel-text" hidden>
+      <h3>Schrift</h3>
+      <div class="field"><label>Text</label><textarea id="t-content" rows="3"></textarea></div>
+      <div class="field"><label>Schriftart</label><select id="t-family"></select></div>
+      <div class="row">
+        <div class="field"><label>Größe</label><input type="number" id="t-size" min="4" max="800" value="64"></div>
+        <div class="field"><label>Schnitt</label>
+          <select id="t-weight">
+            <option value="300">Leicht</option>
+            <option value="400" selected>Normal</option>
+            <option value="600">Halbfett</option>
+            <option value="700">Fett</option>
+            <option value="900">Schwarz</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Zeilenhöhe</label><input type="number" id="t-line" step="0.05" min="0.5" max="4" value="1.2"></div>
+        <div class="field"><label>Laufweite</label><input type="number" id="t-spacing" step="0.5" min="-20" max="80" value="0"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Ausrichtung</label>
+          <select id="t-align"><option value="left">links</option><option value="center">zentriert</option><option value="right">rechts</option></select>
+        </div>
+        <div class="field"><label>Farbe</label><input type="color" id="t-color" value="#1a1a1a"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Kontur</label><input type="color" id="t-stroke" value="#ffffff"></div>
+        <div class="field"><label>Konturstärke</label><input type="number" id="t-strokew" min="0" max="40" step="0.5" value="0"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="t-italic"> Kursiv</label>
+      <div class="row">
+        <button class="btn" data-cmd="load-font">Schriftdatei laden…</button>
+        <button class="btn" data-cmd="rasterize-text">Rastern</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Anpassungen <button class="mini right" data-cmd="reset-adjust" title="Zurücksetzen">⟲</button></h3>
+      <div id="adjust-list"></div>
+    </div>
+
+    <div class="panel grow">
+      <h3>Ebenen
+        <span class="right">
+          <button class="mini" data-cmd="add-layer" title="Neue Ebene">+</button>
+          <button class="mini" data-cmd="copy-layer" title="Duplizieren">⧉</button>
+          <button class="mini" data-cmd="delete-layer" title="Löschen">🗑</button>
+        </span>
+      </h3>
+      <div class="row layer-props">
+        <div class="field"><label>Deckkraft <span id="op-val">100%</span></label>
+          <input type="range" id="l-opacity" min="0" max="100" value="100"></div>
+      </div>
+      <div class="field"><label>Modus</label><select id="l-blend"></select></div>
+      <div class="layer-list" id="layer-list"></div>
+    </div>
+  </aside>
+</main>
+
+<footer class="statusbar">
+  <span id="status-doc">–</span>
+  <span id="status-pos"></span>
+  <span id="status-msg" class="grow"></span>
+  <span id="status-lib" class="lib-state"></span>
+</footer>
+
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="modal">
+    <h2 id="modal-title">Titel</h2>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="modal-cancel">Abbrechen</button>
+      <button class="btn primary" id="modal-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" hidden>
+
+<script>
+/* Bildwerk – lädt die beiden PDF-Bibliotheken.
+   Bevorzugt lokale Kopien in vendor/ (vollständig offline),
+   fällt sonst einmalig auf ein CDN zurück. Ohne beides bleiben
+   nur die PDF-Funktionen deaktiviert; der Bildeditor läuft weiter. */
+(function () {
+  const LIBS = [
+    {
+      key: 'pdflib', label: 'pdf-lib',
+      local: 'vendor/pdf-lib.min.js',
+      cdn: 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js',
+      ok: () => !!window.PDFLib,
+    },
+    {
+      key: 'pdfjs', label: 'pdf.js',
+      local: 'vendor/pdf.min.js',
+      cdn: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js',
+      ok: () => !!window.pdfjsLib,
+      after(fromLocal) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = fromLocal
+          ? 'vendor/pdf.worker.min.js'
+          : 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+      },
+    },
+  ];
+
+  function load(url) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = url;
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('nicht ladbar: ' + url));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function one(lib) {
+    for (const [src, isLocal] of [[lib.local, true], [lib.cdn, false]]) {
+      try {
+        await load(src);
+        if (!lib.ok()) continue;
+        lib.after?.(isLocal);
+        return { key: lib.key, label: lib.label, ok: true, local: isLocal };
+      } catch (_) { /* nächste Quelle */ }
+    }
+    return { key: lib.key, label: lib.label, ok: false };
+  }
+
+  window.bildwerkLibs = Promise.all(LIBS.map(one)).then(res => {
+    const map = {};
+    for (const r of res) map[r.key] = r;
+    window.bildwerkLibState = map;
+    return map;
+  });
+})();
+
+</script>
+<script type="module">
+
+/* ================= core.js ================= */
+/* Bildwerk – Kern: Dokumentmodell, Ebenen, Rendering, Historie.
+   Alles läuft lokal im Browser; es verlässt kein Byte den Rechner. */
+
+const BLEND_MODES = [
+  ['source-over', 'Normal'], ['multiply', 'Multiplizieren'], ['screen', 'Negativ multiplizieren'],
+  ['overlay', 'Ineinanderkopieren'], ['darken', 'Abdunkeln'], ['lighten', 'Aufhellen'],
+  ['color-dodge', 'Farbig abwedeln'], ['color-burn', 'Farbig nachbelichten'],
+  ['hard-light', 'Hartes Licht'], ['soft-light', 'Weiches Licht'], ['difference', 'Differenz'],
+  ['exclusion', 'Ausschluss'], ['hue', 'Farbton'], ['saturation', 'Sättigung'],
+  ['color', 'Farbe'], ['luminosity', 'Luminanz'],
+];
+
+const ADJUSTMENTS = [
+  { key: 'brightness', label: 'Helligkeit', min: 0, max: 300, def: 100, unit: '%' },
+  { key: 'contrast',   label: 'Kontrast',   min: 0, max: 300, def: 100, unit: '%' },
+  { key: 'saturate',   label: 'Sättigung',  min: 0, max: 400, def: 100, unit: '%' },
+  { key: 'hue',        label: 'Farbton',    min: -180, max: 180, def: 0, unit: '°' },
+  { key: 'blur',       label: 'Weichzeichnen', min: 0, max: 60, def: 0, unit: 'px' },
+  { key: 'sepia',      label: 'Sepia',      min: 0, max: 100, def: 0, unit: '%' },
+  { key: 'grayscale',  label: 'Graustufen', min: 0, max: 100, def: 0, unit: '%' },
+  { key: 'invert',     label: 'Invertieren',min: 0, max: 100, def: 0, unit: '%' },
+];
+
+let uid = 1;
+const newId = () => 'id' + (uid++);
+
+const state = {
+  name: 'Unbenannt',
+  pages: [],
+  active: 0,
+  zoom: 1,
+  tool: 'move',
+  fg: '#1a1a1a',
+  bg: '#ffffff',
+  selection: null,       // {x,y,w,h} in Dokumentkoordinaten
+  recentColors: [],
+  sourcePdfBytes: null,  // Original-PDF für den verlustarmen Export
+  dirty: false,
+};
+
+/* ---------------- Hilfsfunktionen ---------------- */
+
+function makeCanvas(w, h) {
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(w));
+  c.height = Math.max(1, Math.round(h));
+  return c;
+}
+
+function cloneCanvas(src) {
+  const c = makeCanvas(src.width, src.height);
+  c.getContext('2d').drawImage(src, 0, 0);
+  return c;
+}
+
+function defaultAdjust() {
+  const a = {};
+  for (const d of ADJUSTMENTS) a[d.key] = d.def;
+  return a;
+}
+
+function isAdjustNeutral(a) {
+  return ADJUSTMENTS.every(d => Math.abs((a[d.key] ?? d.def) - d.def) < 0.001);
+}
+
+function filterString(a) {
+  if (!a || isAdjustNeutral(a)) return 'none';
+  return [
+    `brightness(${a.brightness}%)`,
+    `contrast(${a.contrast}%)`,
+    `saturate(${a.saturate}%)`,
+    `hue-rotate(${a.hue}deg)`,
+    a.blur > 0 ? `blur(${a.blur}px)` : '',
+    a.sepia > 0 ? `sepia(${a.sepia}%)` : '',
+    a.grayscale > 0 ? `grayscale(${a.grayscale}%)` : '',
+    a.invert > 0 ? `invert(${a.invert}%)` : '',
+  ].filter(Boolean).join(' ');
+}
+
+/* ---------------- Seiten & Ebenen ---------------- */
+
+function createPage(w = 1200, h = 800, bgColor = '#ffffff') {
+  return {
+    id: newId(),
+    width: Math.round(w),
+    height: Math.round(h),
+    bgColor,
+    layers: [],
+    pdfSource: null, // {index} – Verweis auf Seite im Original-PDF
+  };
+}
+
+function createLayer(opts = {}) {
+  return {
+    id: newId(),
+    name: opts.name || 'Ebene',
+    type: opts.type || 'raster',   // raster | text | shape
+    visible: true,
+    opacity: 1,
+    blend: 'source-over',
+    x: opts.x ?? 0,
+    y: opts.y ?? 0,
+    rot: 0,
+    sx: 1,
+    sy: 1,
+    canvas: opts.canvas || makeCanvas(opts.w || 1, opts.h || 1),
+    adjust: defaultAdjust(),
+    text: opts.text || null,
+    shape: opts.shape || null,
+  };
+}
+
+const page = () => state.pages[state.active];
+const layers = () => page()?.layers ?? [];
+
+function activeLayer() {
+  const p = page();
+  if (!p) return null;
+  return p.layers.find(l => l.id === p.activeLayerId) || p.layers[p.layers.length - 1] || null;
+}
+
+function setActiveLayer(id) {
+  const p = page();
+  if (p) p.activeLayerId = id;
+}
+
+function addLayer(layer, { atTop = true } = {}) {
+  const p = page();
+  if (atTop) p.layers.push(layer); else p.layers.unshift(layer);
+  p.activeLayerId = layer.id;
+  return layer;
+}
+
+function removeLayer(id) {
+  const p = page();
+  const i = p.layers.findIndex(l => l.id === id);
+  if (i < 0) return;
+  p.layers.splice(i, 1);
+  const next = p.layers[Math.min(i, p.layers.length - 1)];
+  p.activeLayerId = next ? next.id : null;
+}
+
+/* Kopie-bei-Schreibzugriff: vor jeder Pixeländerung aufrufen, damit
+   ältere Historieneinträge ihr Canvas behalten. */
+function beginPixelEdit(layer) {
+  layer.canvas = cloneCanvas(layer.canvas);
+  return layer.canvas.getContext('2d');
+}
+
+/* ---------------- Transformationen ---------------- */
+
+function layerMatrix(layer) {
+  const w = layer.canvas.width, h = layer.canvas.height;
+  const cx = layer.x + (w * layer.sx) / 2;
+  const cy = layer.y + (h * layer.sy) / 2;
+  return new DOMMatrix()
+    .translate(cx, cy)
+    .rotate((layer.rot * 180) / Math.PI)
+    .scale(layer.sx, layer.sy)
+    .translate(-w / 2, -h / 2);
+}
+
+/** Dokumentpunkt -> Pixelkoordinate innerhalb des Ebenen-Canvas */
+function docToLayer(layer, px, py) {
+  const inv = layerMatrix(layer).inverse();
+  const p = inv.transformPoint(new DOMPoint(px, py));
+  return { x: p.x, y: p.y };
+}
+
+function layerToDoc(layer, lx, ly) {
+  const p = layerMatrix(layer).transformPoint(new DOMPoint(lx, ly));
+  return { x: p.x, y: p.y };
+}
+
+function layerCorners(layer) {
+  const w = layer.canvas.width, h = layer.canvas.height;
+  return [[0, 0], [w, 0], [w, h], [0, h]].map(([x, y]) => layerToDoc(layer, x, y));
+}
+
+function layerBBox(layer) {
+  const c = layerCorners(layer);
+  const xs = c.map(p => p.x), ys = c.map(p => p.y);
+  const x = Math.min(...xs), y = Math.min(...ys);
+  return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
+}
+
+function hitLayer(layer, px, py) {
+  const p = docToLayer(layer, px, py);
+  return p.x >= 0 && p.y >= 0 && p.x < layer.canvas.width && p.y < layer.canvas.height;
+}
+
+/* ---------------- Text & Formen rastern ---------------- */
+
+function defaultText(content = 'Text') {
+  return {
+    content,
+    family: 'system-ui, sans-serif',
+    size: 64,
+    weight: '400',
+    italic: false,
+    color: '#1a1a1a',
+    stroke: '#ffffff',
+    strokeWidth: 0,
+    align: 'left',
+    lineHeight: 1.2,
+    spacing: 0,
+  };
+}
+
+function fontOf(t) {
+  return `${t.italic ? 'italic ' : ''}${t.weight} ${t.size}px ${t.family}`;
+}
+
+function rasterizeText(layer) {
+  const t = layer.text;
+  const lines = String(t.content ?? '').split('\n');
+  const probe = makeCanvas(8, 8).getContext('2d');
+  probe.font = fontOf(t);
+  const hasSpacingApi = 'letterSpacing' in probe;
+  if (hasSpacingApi) probe.letterSpacing = `${t.spacing}px`;
+
+  const widths = lines.map(line => {
+    if (hasSpacingApi) return probe.measureText(line).width;
+    let w = 0;
+    for (const ch of line) w += probe.measureText(ch).width + t.spacing;
+    return Math.max(0, w - (line.length ? t.spacing : 0));
+  });
+
+  const lineH = t.size * t.lineHeight;
+  const pad = Math.ceil(t.size * 0.35 + t.strokeWidth * 2 + 4);
+  const w = Math.ceil(Math.max(1, ...widths)) + pad * 2;
+  const h = Math.ceil(lineH * lines.length) + pad * 2;
+
+  const c = makeCanvas(w, h);
+  const ctx = c.getContext('2d');
+  ctx.font = fontOf(t);
+  if (hasSpacingApi) ctx.letterSpacing = `${t.spacing}px`;
+  ctx.textBaseline = 'alphabetic';
+  ctx.lineJoin = 'round';
+  ctx.miterLimit = 2;
+
+  lines.forEach((line, i) => {
+    const baseY = pad + lineH * i + t.size * 0.82;
+    let x = pad;
+    if (t.align === 'center') x = pad + (w - pad * 2 - widths[i]) / 2;
+    if (t.align === 'right') x = pad + (w - pad * 2 - widths[i]);
+
+    const draw = (fn) => {
+      if (hasSpacingApi) { fn(line, x, baseY); return; }
+      let cx = x;
+      for (const ch of line) { fn(ch, cx, baseY); cx += ctx.measureText(ch).width + t.spacing; }
+    };
+    if (t.strokeWidth > 0) {
+      ctx.strokeStyle = t.stroke;
+      ctx.lineWidth = t.strokeWidth * 2;
+      draw((s, px, py) => ctx.strokeText(s, px, py));
+    }
+    ctx.fillStyle = t.color;
+    draw((s, px, py) => ctx.fillText(s, px, py));
+  });
+
+  layer.canvas = c;
+  return c;
+}
+
+function rasterizeShape(layer) {
+  const s = layer.shape;
+  const pad = Math.ceil(s.strokeWidth) + 2;
+  const aw = Math.max(1, Math.abs(s.w)), ah = Math.max(1, Math.abs(s.h));
+  const c = makeCanvas(aw + pad * 2, ah + pad * 2);
+  const ctx = c.getContext('2d');
+  ctx.translate(pad, pad);
+  ctx.beginPath();
+  if (s.kind === 'ellipse') {
+    ctx.ellipse(aw / 2, ah / 2, aw / 2, ah / 2, 0, 0, Math.PI * 2);
+  } else if (s.kind === 'line') {
+    const x0 = s.w < 0 ? aw : 0, y0 = s.h < 0 ? ah : 0;
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(aw - x0, ah - y0);
+  } else {
+    const r = Math.min(s.radius || 0, aw / 2, ah / 2);
+    if (r > 0 && ctx.roundRect) ctx.roundRect(0, 0, aw, ah, r);
+    else ctx.rect(0, 0, aw, ah);
+  }
+  if (s.kind !== 'line' && s.fill !== 'none') { ctx.fillStyle = s.fill; ctx.fill(); }
+  if (s.strokeWidth > 0) {
+    ctx.strokeStyle = s.stroke; ctx.lineWidth = s.strokeWidth;
+    ctx.lineCap = 'round'; ctx.stroke();
+  }
+  layer.canvas = c;
+  return c;
+}
+
+function refreshLayer(layer) {
+  if (layer.type === 'text') rasterizeText(layer);
+  else if (layer.type === 'shape') rasterizeShape(layer);
+}
+
+/* ---------------- Rendering ---------------- */
+
+function drawLayer(ctx, layer) {
+  if (!layer.visible || layer.opacity <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = layer.opacity;
+  ctx.globalCompositeOperation = layer.blend;
+  ctx.filter = filterString(layer.adjust);
+  const m = layerMatrix(layer);
+  ctx.setTransform(new DOMMatrix(ctx.getTransform()).multiply(m));
+  ctx.drawImage(layer.canvas, 0, 0);
+  ctx.restore();
+}
+
+/** Seite auf einen Kontext zeichnen. scale=1 entspricht 1:1. */
+function renderPage(p, ctx, { scale = 1, transparent = false } = {}) {
+  ctx.save();
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.clearRect(0, 0, p.width, p.height);
+  if (!transparent && p.bgColor) {
+    ctx.fillStyle = p.bgColor;
+    ctx.fillRect(0, 0, p.width, p.height);
+  }
+  for (const l of p.layers) drawLayer(ctx, l);
+  ctx.restore();
+}
+
+/** Seite als eigenständiges Canvas (für Export, Miniaturen, PDF). */
+function pageToCanvas(p, scale = 1, transparent = false) {
+  const c = makeCanvas(p.width * scale, p.height * scale);
+  renderPage(p, c.getContext('2d'), { scale, transparent });
+  return c;
+}
+
+/** Ebene mit allen Anpassungen flach in Dokumentkoordinaten rendern. */
+function flattenLayer(p, layer) {
+  const c = makeCanvas(p.width, p.height);
+  drawLayer(c.getContext('2d'), layer);
+  return c;
+}
+
+/* ---------------- Historie ---------------- */
+
+const history = { past: [], future: [], limit: 40 };
+
+function snapPages() {
+  return state.pages.map(p => ({
+    ...p,
+    layers: p.layers.map(l => ({
+      ...l,
+      adjust: { ...l.adjust },
+      text: l.text ? { ...l.text } : null,
+      shape: l.shape ? { ...l.shape } : null,
+    })),
+  }));
+}
+
+function snapshot() {
+  return { pages: snapPages(), active: state.active, selection: state.selection ? { ...state.selection } : null };
+}
+
+function apply(sn) {
+  state.pages = sn.pages.map(p => ({
+    ...p,
+    layers: p.layers.map(l => ({
+      ...l,
+      adjust: { ...l.adjust },
+      text: l.text ? { ...l.text } : null,
+      shape: l.shape ? { ...l.shape } : null,
+    })),
+  }));
+  state.active = Math.min(sn.active, state.pages.length - 1);
+  state.selection = sn.selection ? { ...sn.selection } : null;
+}
+
+/** Vor jeder Änderung aufrufen – sichert den aktuellen Stand. */
+function commit(label = '') {
+  history.past.push({ ...snapshot(), label });
+  if (history.past.length > history.limit) history.past.shift();
+  history.future.length = 0;
+  state.dirty = true;
+}
+
+function undo() {
+  if (!history.past.length) return false;
+  history.future.push(snapshot());
+  apply(history.past.pop());
+  return true;
+}
+
+function redo() {
+  if (!history.future.length) return false;
+  history.past.push(snapshot());
+  apply(history.future.pop());
+  return true;
+}
+
+const canUndo = () => history.past.length > 0;
+const canRedo = () => history.future.length > 0;
+function resetHistory() { history.past.length = 0; history.future.length = 0; }
+
+/* ---------------- Ereignisse ---------------- */
+
+const listeners = { change: [], status: [] };
+function on(evt, fn) { (listeners[evt] ||= []).push(fn); }
+function emit(evt, arg) { (listeners[evt] || []).forEach(fn => fn(arg)); }
+const notify = () => emit('change');
+const say = (msg) => emit('status', msg);
+
+/* ================= filters.js ================= */
+/* Bildwerk – Pixeloperationen (einrechnende Filter). */
+
+const px = (c) => c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, c.width, c.height);
+const put = (c, d) => { c.getContext('2d').putImageData(d, 0, 0); return c; };
+const clamp = (v) => v < 0 ? 0 : v > 255 ? 255 : v;
+
+/** Nicht-destruktive Anpassungen dauerhaft ins Pixelbild schreiben. */
+function bakeAdjust(canvas, adjust) {
+  const f = filterString(adjust);
+  if (f === 'none') return canvas;
+  const pad = Math.ceil((adjust.blur || 0) * 3);
+  const out = makeCanvas(canvas.width + pad * 2, canvas.height + pad * 2);
+  const ctx = out.getContext('2d');
+  ctx.filter = f;
+  ctx.drawImage(canvas, pad, pad);
+  return { canvas: out, offset: pad, adjust: defaultAdjust() };
+}
+
+function convolve(canvas, kernel, divisor = 1, offset = 0) {
+  const k = Math.round(Math.sqrt(kernel.length));
+  const half = (k - 1) / 2;
+  const src = px(canvas), w = canvas.width, h = canvas.height;
+  const out = new ImageData(w, h);
+  const s = src.data, d = out.data;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let r = 0, g = 0, b = 0;
+      for (let ky = 0; ky < k; ky++) {
+        for (let kx = 0; kx < k; kx++) {
+          const sy = Math.min(h - 1, Math.max(0, y + ky - half));
+          const sx = Math.min(w - 1, Math.max(0, x + kx - half));
+          const i = (sy * w + sx) * 4, kv = kernel[ky * k + kx];
+          r += s[i] * kv; g += s[i + 1] * kv; b += s[i + 2] * kv;
+        }
+      }
+      const o = (y * w + x) * 4;
+      d[o] = clamp(r / divisor + offset);
+      d[o + 1] = clamp(g / divisor + offset);
+      d[o + 2] = clamp(b / divisor + offset);
+      d[o + 3] = s[o + 3];
+    }
+  }
+  return put(makeCanvas(w, h), out);
+}
+
+const sharpen = (c) => convolve(c, [0, -1, 0, -1, 5, -1, 0, -1, 0]);
+const edges   = (c) => convolve(c, [-1, -1, -1, -1, 8, -1, -1, -1, -1], 1, 0);
+const emboss  = (c) => convolve(c, [-2, -1, 0, -1, 1, 1, 0, 1, 2], 1, 0);
+const softBlur= (c) => convolve(c, [1, 2, 1, 2, 4, 2, 1, 2, 1], 16);
+
+function pixelate(canvas, size = 12) {
+  const w = canvas.width, h = canvas.height;
+  const small = makeCanvas(Math.max(1, w / size), Math.max(1, h / size));
+  const sc = small.getContext('2d');
+  sc.imageSmoothingEnabled = true;
+  sc.drawImage(canvas, 0, 0, small.width, small.height);
+  const out = makeCanvas(w, h);
+  const oc = out.getContext('2d');
+  oc.imageSmoothingEnabled = false;
+  oc.drawImage(small, 0, 0, w, h);
+  return out;
+}
+
+function noise(canvas, amount = 20) {
+  const d = px(canvas), a = d.data;
+  for (let i = 0; i < a.length; i += 4) {
+    const n = (Math.random() - 0.5) * amount * 2;
+    a[i] = clamp(a[i] + n); a[i + 1] = clamp(a[i + 1] + n); a[i + 2] = clamp(a[i + 2] + n);
+  }
+  return put(makeCanvas(canvas.width, canvas.height), d);
+}
+
+function posterize(canvas, levels = 5) {
+  const d = px(canvas), a = d.data;
+  const step = 255 / Math.max(1, levels - 1);
+  for (let i = 0; i < a.length; i += 4)
+    for (let k = 0; k < 3; k++) a[i + k] = clamp(Math.round(a[i + k] / step) * step);
+  return put(makeCanvas(canvas.width, canvas.height), d);
+}
+
+function threshold(canvas, level = 128) {
+  const d = px(canvas), a = d.data;
+  for (let i = 0; i < a.length; i += 4) {
+    const v = a[i] * 0.299 + a[i + 1] * 0.587 + a[i + 2] * 0.114 >= level ? 255 : 0;
+    a[i] = a[i + 1] = a[i + 2] = v;
+  }
+  return put(makeCanvas(canvas.width, canvas.height), d);
+}
+
+function autoLevel(canvas) {
+  const d = px(canvas), a = d.data;
+  let lo = 255, hi = 0;
+  for (let i = 0; i < a.length; i += 4) {
+    if (a[i + 3] < 8) continue;
+    const l = a[i] * 0.299 + a[i + 1] * 0.587 + a[i + 2] * 0.114;
+    if (l < lo) lo = l; if (l > hi) hi = l;
+  }
+  if (hi - lo < 1) return canvas;
+  const scale = 255 / (hi - lo);
+  for (let i = 0; i < a.length; i += 4)
+    for (let k = 0; k < 3; k++) a[i + k] = clamp((a[i + k] - lo) * scale);
+  return put(makeCanvas(canvas.width, canvas.height), d);
+}
+
+function vignette(canvas, strength = 0.75) {
+  const out = makeCanvas(canvas.width, canvas.height);
+  const ctx = out.getContext('2d');
+  ctx.drawImage(canvas, 0, 0);
+  const w = canvas.width, h = canvas.height;
+  const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.32, w / 2, h / 2, Math.max(w, h) * 0.72);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(1, `rgba(0,0,0,${strength})`);
+  ctx.globalCompositeOperation = 'source-atop';
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  return out;
+}
+
+function flip(canvas, horizontal = true) {
+  const out = makeCanvas(canvas.width, canvas.height);
+  const ctx = out.getContext('2d');
+  ctx.translate(horizontal ? canvas.width : 0, horizontal ? 0 : canvas.height);
+  ctx.scale(horizontal ? -1 : 1, horizontal ? 1 : -1);
+  ctx.drawImage(canvas, 0, 0);
+  return out;
+}
+
+function rotate90(canvas) {
+  const out = makeCanvas(canvas.height, canvas.width);
+  const ctx = out.getContext('2d');
+  ctx.translate(out.width / 2, out.height / 2);
+  ctx.rotate(Math.PI / 2);
+  ctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+  return out;
+}
+
+/** Farbeimer mit Toleranz; arbeitet direkt auf dem übergebenen Canvas. */
+function floodFill(canvas, sx, sy, hex, tolerance = 32) {
+  const w = canvas.width, h = canvas.height;
+  sx = Math.floor(sx); sy = Math.floor(sy);
+  if (sx < 0 || sy < 0 || sx >= w || sy >= h) return false;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const img = ctx.getImageData(0, 0, w, h);
+  const a = img.data;
+  const start = (sy * w + sx) * 4;
+  const target = [a[start], a[start + 1], a[start + 2], a[start + 3]];
+  const fill = hexToRgb(hex);
+  if (target[0] === fill[0] && target[1] === fill[1] && target[2] === fill[2] && target[3] === 255) return false;
+
+  const tol = tolerance * tolerance * 4;
+  const seen = new Uint8Array(w * h);
+  const stack = [sy * w + sx];
+  const match = (i) => {
+    const o = i * 4;
+    const dr = a[o] - target[0], dg = a[o + 1] - target[1], db = a[o + 2] - target[2], da = a[o + 3] - target[3];
+    return dr * dr + dg * dg + db * db + da * da <= tol;
+  };
+  while (stack.length) {
+    const i = stack.pop();
+    if (seen[i] || !match(i)) continue;
+    seen[i] = 1;
+    const o = i * 4;
+    a[o] = fill[0]; a[o + 1] = fill[1]; a[o + 2] = fill[2]; a[o + 3] = 255;
+    const x = i % w, y = (i / w) | 0;
+    if (x > 0) stack.push(i - 1);
+    if (x < w - 1) stack.push(i + 1);
+    if (y > 0) stack.push(i - w);
+    if (y < h - 1) stack.push(i + w);
+  }
+  ctx.putImageData(img, 0, 0);
+  return true;
+}
+
+function hexToRgb(hex) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+  return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [0, 0, 0];
+}
+
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+}
+
+/* ================= fonts.js ================= */
+/* Bildwerk – Schriftverwaltung: Systemschriften plus eigene Schriftdateien. */
+
+const SYSTEM_FONTS = [
+  ['system-ui, sans-serif', 'System (serifenlos)'],
+  ['Arial, Helvetica, sans-serif', 'Arial / Helvetica'],
+  ['"Helvetica Neue", Helvetica, sans-serif', 'Helvetica Neue'],
+  ['Verdana, Geneva, sans-serif', 'Verdana'],
+  ['Tahoma, sans-serif', 'Tahoma'],
+  ['"Trebuchet MS", sans-serif', 'Trebuchet MS'],
+  ['Impact, Haettenschweiler, sans-serif', 'Impact'],
+  ['"Segoe UI", Roboto, sans-serif', 'Segoe UI / Roboto'],
+  ['Georgia, serif', 'Georgia'],
+  ['"Times New Roman", Times, serif', 'Times New Roman'],
+  ['Garamond, serif', 'Garamond'],
+  ['"Palatino Linotype", Palatino, serif', 'Palatino'],
+  ['"Courier New", Courier, monospace', 'Courier New'],
+  ['"Consolas", ui-monospace, monospace', 'Consolas'],
+  ['cursive', 'Schreibschrift (System)'],
+  ['fantasy', 'Dekorativ (System)'],
+];
+
+/** Vom Nutzer geladene Schriften: name -> dataURL (wird im Projekt mitgespeichert) */
+const customFonts = new Map();
+
+function familyName(fileName) {
+  return fileName.replace(/\.(ttf|otf|woff2?|ttc)$/i, '').replace(/[^\w\s-]/g, '').trim() || 'Eigene Schrift';
+}
+
+async function registerFont(name, dataUrl) {
+  const face = new FontFace(name, `url(${dataUrl})`);
+  await face.load();
+  document.fonts.add(face);
+  customFonts.set(name, dataUrl);
+  return name;
+}
+
+async function loadFontFile(file) {
+  const dataUrl = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+  return registerFont(familyName(file.name), dataUrl);
+}
+
+async function restoreFonts(map) {
+  for (const [name, url] of Object.entries(map || {})) {
+    try { await registerFont(name, url); } catch (e) { console.warn('Schrift nicht ladbar:', name, e); }
+  }
+}
+
+function fontOptions() {
+  const custom = [...customFonts.keys()].map(n => [`"${n}"`, n + ' (geladen)']);
+  return [...custom, ...SYSTEM_FONTS];
+}
+
+function serializeFonts() {
+  return Object.fromEntries(customFonts);
+}
+
+/* ================= tools.js ================= */
+/* Bildwerk – Werkzeuge und Zeigerinteraktion. */
+
+
+const TOOLS = [
+  { id: 'move',    icon: '✥', label: 'Verschieben / Transformieren (V)' },
+  { id: 'select',  icon: '▭', label: 'Rechteckauswahl (M)' },
+  { id: 'crop',    icon: '⌗', label: 'Zuschneiden (C)' },
+  { id: 'brush',   icon: '✎', label: 'Pinsel (B)' },
+  { id: 'eraser',  icon: '⌫', label: 'Radierer (E)' },
+  { id: 'bucket',  icon: '◍', label: 'Farbeimer (G)' },
+  { id: 'eyedrop', icon: '⚲', label: 'Pipette (I)' },
+  { id: 'text',    icon: 'T', label: 'Text (T)' },
+  { id: 'rect',    icon: '▢', label: 'Rechteck (U)' },
+  { id: 'ellipse', icon: '◯', label: 'Ellipse' },
+  { id: 'line',    icon: '╱', label: 'Linie' },
+  { id: 'hand',    icon: '✋', label: 'Ansicht verschieben (Leertaste)' },
+];
+
+const opts = {
+  size: 28, hardness: 0.7, flow: 1,
+  tolerance: 32,
+  strokeWidth: 4, fillShape: true, radius: 0,
+  fontSize: 64,
+};
+
+let drag = null;        // laufende Interaktion
+let cropRect = null;    // Vorschau beim Zuschneiden
+
+const getCropRect = () => cropRect;
+const clearCrop = () => { cropRect = null; };
+
+/* ---------------- Pinselstempel ---------------- */
+
+function stamp(size, hardness, color) {
+  const r = Math.max(0.5, size / 2);
+  const c = makeCanvas(Math.ceil(r * 2) + 2, Math.ceil(r * 2) + 2);
+  const ctx = c.getContext('2d');
+  const cx = c.width / 2, cy = c.height / 2;
+  if (hardness >= 0.995) {
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  } else {
+    const g = ctx.createRadialGradient(cx, cy, r * hardness, cx, cy, r);
+    g.addColorStop(0, color);
+    g.addColorStop(1, color.length === 7 ? color + '00' : 'transparent');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, c.width, c.height);
+  }
+  return c;
+}
+
+function paintSegment(ctx, from, to, brush, erase, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.globalCompositeOperation = erase ? 'destination-out' : 'source-over';
+  const dx = to.x - from.x, dy = to.y - from.y;
+  const dist = Math.hypot(dx, dy);
+  const step = Math.max(1, brush.width * 0.14);
+  const n = Math.max(1, Math.ceil(dist / step));
+  for (let i = 0; i <= n; i++) {
+    const x = from.x + (dx * i) / n, y = from.y + (dy * i) / n;
+    ctx.drawImage(brush, x - brush.width / 2, y - brush.height / 2);
+  }
+  ctx.restore();
+}
+
+/* ---------------- Transformationsgriffe ---------------- */
+
+function handlesFor(layer) {
+  if (!layer) return null;
+  const c = layerCorners(layer);
+  const mTop = { x: (c[0].x + c[1].x) / 2, y: (c[0].y + c[1].y) / 2 };
+  const center = { x: (c[0].x + c[2].x) / 2, y: (c[0].y + c[2].y) / 2 };
+  let nx = mTop.x - center.x, ny = mTop.y - center.y;
+  const len = Math.hypot(nx, ny) || 1;
+  const off = 26 / state.zoom;
+  return {
+    corners: c,
+    center,
+    rotate: { x: mTop.x + (nx / len) * off, y: mTop.y + (ny / len) * off },
+  };
+}
+
+function hitHandle(layer, p) {
+  const h = handlesFor(layer);
+  if (!h) return null;
+  const tol = 9 / state.zoom;
+  const near = (a) => Math.hypot(a.x - p.x, a.y - p.y) <= tol;
+  if (near(h.rotate)) return { kind: 'rotate' };
+  for (let i = 0; i < 4; i++) if (near(h.corners[i])) return { kind: 'scale', corner: i };
+  return null;
+}
+
+function rot(v, a) {
+  return { x: v.x * Math.cos(a) - v.y * Math.sin(a), y: v.x * Math.sin(a) + v.y * Math.cos(a) };
+}
+
+/* Skaliert die Ebene so, dass die gegenüberliegende Ecke ortsfest bleibt. */
+function applyScale(layer, cornerIdx, p, proportional) {
+  const w = layer.canvas.width, h = layer.canvas.height;
+  const anchorIdx = (cornerIdx + 2) % 4;
+  const local = [[0, 0], [w, 0], [w, h], [0, h]];
+  const [ax, ay] = local[anchorIdx];
+  const A = drag.anchorDoc;
+  const v = rot({ x: p.x - A.x, y: p.y - A.y }, -layer.rot);
+  const dirX = ax === 0 ? 1 : -1, dirY = ay === 0 ? 1 : -1;
+  let sx = (v.x * dirX) / w, sy = (v.y * dirY) / h;
+  const min = 2 / Math.max(w, h);
+  if (proportional) {
+    const s = Math.max(Math.abs(sx), Math.abs(sy));
+    sx = Math.sign(sx || 1) * s; sy = Math.sign(sy || 1) * s;
+  }
+  sx = Math.abs(sx) < min ? min * Math.sign(sx || 1) : sx;
+  sy = Math.abs(sy) < min ? min * Math.sign(sy || 1) : sy;
+  layer.sx = sx; layer.sy = sy;
+  const off = rot({ x: (w / 2 - ax) * sx, y: (h / 2 - ay) * sy }, layer.rot);
+  const cx = A.x + off.x, cy = A.y + off.y;
+  layer.x = cx - (w * sx) / 2;
+  layer.y = cy - (h * sy) / 2;
+}
+
+/* ---------------- Ebenen-Hilfen ---------------- */
+
+function topLayerAt(p) {
+  const ls = page().layers;
+  for (let i = ls.length - 1; i >= 0; i--) {
+    const l = ls[i];
+    if (!l.visible) continue;
+    if (!hitLayer(l, p.x, p.y)) continue;
+    const lp = docToLayer(l, p.x, p.y);
+    const ctx = l.canvas.getContext('2d', { willReadFrequently: true });
+    const a = ctx.getImageData(Math.floor(lp.x), Math.floor(lp.y), 1, 1).data[3];
+    if (a > 8) return l;
+  }
+  return null;
+}
+
+/** Liefert eine bemalbare Rasterebene – legt bei Bedarf eine neue an. */
+function paintTarget() {
+  let l = activeLayer();
+  if (!l || l.type !== 'raster') {
+    const p = page();
+    l = addLayer(createLayer({ name: 'Ebene ' + (p.layers.length + 1), w: p.width, h: p.height }));
+    say('Neue Rasterebene angelegt');
+  }
+  return l;
+}
+
+function brushScale(layer) {
+  return (Math.abs(layer.sx) + Math.abs(layer.sy)) / 2 || 1;
+}
+
+/* ---------------- Zeigerereignisse ---------------- */
+
+function pointerDown(p, ev) {
+  const t = state.tool;
+  const P = page();
+  if (!P) return;
+
+  if (t === 'eyedrop') {
+    const c = makeCanvas(P.width, P.height);
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    renderPage(P, ctx, { scale: 1 });
+    const x = Math.min(P.width - 1, Math.max(0, Math.floor(p.x)));
+    const y = Math.min(P.height - 1, Math.max(0, Math.floor(p.y)));
+    const d = ctx.getImageData(x, y, 1, 1).data;
+    const hex = rgbToHex(d[0], d[1], d[2]);
+    if (ev.altKey) state.bg = hex; else state.fg = hex;
+    if (!state.recentColors.includes(hex)) state.recentColors.unshift(hex);
+    state.recentColors.length = Math.min(state.recentColors.length, 12);
+    say('Farbe aufgenommen: ' + hex);
+    notify();
+    return;
+  }
+
+  if (t === 'select' || t === 'crop') {
+    commit(t === 'crop' ? 'Zuschneiden' : 'Auswahl');
+    drag = { mode: t, start: p };
+    if (t === 'select') state.selection = { x: p.x, y: p.y, w: 0, h: 0 };
+    else cropRect = { x: p.x, y: p.y, w: 0, h: 0 };
+    notify();
+    return;
+  }
+
+  if (t === 'brush' || t === 'eraser') {
+    commit(t === 'brush' ? 'Pinsel' : 'Radierer');
+    const layer = paintTarget();
+    const ctx = beginPixelEdit(layer);
+    const s = brushScale(layer);
+    const color = ev.altKey ? state.bg : state.fg;
+    const brush = stamp(opts.size / s, opts.hardness, t === 'eraser' ? '#000000' : color);
+    const lp = docToLayer(layer, p.x, p.y);
+    paintSegment(ctx, lp, lp, brush, t === 'eraser', opts.flow);
+    drag = { mode: 'paint', layer, ctx, brush, last: lp, erase: t === 'eraser' };
+    notify();
+    return;
+  }
+
+  if (t === 'bucket') {
+    const layer = paintTarget();
+    commit('Füllen');
+    const ctx = beginPixelEdit(layer);
+    const lp = docToLayer(layer, p.x, p.y);
+    if (state.selection) {
+      // Nur innerhalb der Auswahl füllen
+      const sel = state.selection;
+      ctx.save();
+      ctx.beginPath();
+      const inv = layerMatrix(layer).inverse();
+      const pts = [[sel.x, sel.y], [sel.x + sel.w, sel.y], [sel.x + sel.w, sel.y + sel.h], [sel.x, sel.y + sel.h]]
+        .map(([x, y]) => inv.transformPoint(new DOMPoint(x, y)));
+      ctx.moveTo(pts[0].x, pts[0].y);
+      pts.slice(1).forEach(q => ctx.lineTo(q.x, q.y));
+      ctx.closePath();
+      ctx.clip();
+      ctx.fillStyle = ev.altKey ? state.bg : state.fg;
+      ctx.fillRect(0, 0, layer.canvas.width, layer.canvas.height);
+      ctx.restore();
+    } else {
+      floodFill(layer.canvas, lp.x, lp.y, ev.altKey ? state.bg : state.fg, opts.tolerance);
+    }
+    notify();
+    return;
+  }
+
+  if (t === 'text') {
+    const hit = topLayerAt(p);
+    if (hit && hit.type === 'text') { setActiveLayer(hit.id); notify(); return; }
+    commit('Text');
+    const text = defaultText('Neuer Text');
+    text.size = opts.fontSize;
+    text.color = state.fg;
+    const layer = createLayer({ name: 'Text', type: 'text', text });
+    rasterizeText(layer);
+    layer.x = p.x - 10; layer.y = p.y - layer.canvas.height / 2;
+    addLayer(layer);
+    say('Textebene angelegt – Inhalt rechts im Schrift-Panel bearbeiten');
+    notify();
+    return;
+  }
+
+  if (t === 'rect' || t === 'ellipse' || t === 'line') {
+    commit('Form');
+    const shape = {
+      kind: t, w: 1, h: 1,
+      fill: opts.fillShape ? state.fg : 'none',
+      stroke: state.bg,
+      strokeWidth: t === 'line' ? Math.max(1, opts.strokeWidth) : (opts.fillShape ? 0 : Math.max(1, opts.strokeWidth)),
+      radius: opts.radius,
+    };
+    if (t === 'line') shape.stroke = state.fg;
+    const layer = createLayer({ name: t === 'line' ? 'Linie' : t === 'rect' ? 'Rechteck' : 'Ellipse', type: 'shape', shape });
+    layer.x = p.x; layer.y = p.y;
+    rasterizeShape(layer);
+    addLayer(layer);
+    drag = { mode: 'shape', layer, start: p };
+    notify();
+    return;
+  }
+
+  if (t === 'move') {
+    const act = activeLayer();
+    const handle = act ? hitHandle(act, p) : null;
+    if (handle) {
+      commit('Transformieren');
+      const c = layerCorners(act);
+      drag = {
+        mode: handle.kind, layer: act, start: p, corner: handle.corner,
+        anchorDoc: handle.kind === 'scale' ? c[(handle.corner + 2) % 4] : null,
+        startRot: act.rot,
+        startAngle: Math.atan2(p.y - handlesFor(act).center.y, p.x - handlesFor(act).center.x),
+        center: handlesFor(act).center,
+      };
+      return;
+    }
+    const hit = (act && hitLayer(act, p.x, p.y) && topLayerAt(p) === act) ? act : topLayerAt(p);
+    if (!hit) { state.selection = null; notify(); return; }
+    setActiveLayer(hit.id);
+    commit('Verschieben');
+    drag = { mode: 'move', layer: hit, start: p, ox: hit.x, oy: hit.y };
+    notify();
+  }
+}
+
+function pointerMove(p, ev) {
+  if (!drag) return;
+  const l = drag.layer;
+  switch (drag.mode) {
+    case 'paint': {
+      const lp = docToLayer(l, p.x, p.y);
+      paintSegment(drag.ctx, drag.last, lp, drag.brush, drag.erase, opts.flow);
+      drag.last = lp;
+      break;
+    }
+    case 'move': {
+      let dx = p.x - drag.start.x, dy = p.y - drag.start.y;
+      if (ev.shiftKey) { if (Math.abs(dx) > Math.abs(dy)) dy = 0; else dx = 0; }
+      l.x = drag.ox + dx; l.y = drag.oy + dy;
+      break;
+    }
+    case 'scale':
+      applyScale(l, drag.corner, p, ev.shiftKey);
+      break;
+    case 'rotate': {
+      const a = Math.atan2(p.y - drag.center.y, p.x - drag.center.x);
+      let r = drag.startRot + (a - drag.startAngle);
+      if (ev.shiftKey) r = Math.round(r / (Math.PI / 12)) * (Math.PI / 12);
+      const w = l.canvas.width, h = l.canvas.height;
+      const c = { x: l.x + (w * l.sx) / 2, y: l.y + (h * l.sy) / 2 };
+      l.rot = r;
+      l.x = c.x - (w * l.sx) / 2; l.y = c.y - (h * l.sy) / 2;
+      break;
+    }
+    case 'select':
+    case 'crop': {
+      const r = normRect(drag.start, p, ev.shiftKey);
+      if (drag.mode === 'select') state.selection = r; else cropRect = r;
+      break;
+    }
+    case 'shape': {
+      const s = l.shape;
+      if (s.kind === 'line') {
+        s.w = p.x - drag.start.x; s.h = p.y - drag.start.y;
+        const pad = Math.ceil(s.strokeWidth) + 2;
+        l.x = Math.min(drag.start.x, p.x) - pad;
+        l.y = Math.min(drag.start.y, p.y) - pad;
+      } else {
+        const r = normRect(drag.start, p, ev.shiftKey);
+        s.w = Math.max(1, r.w); s.h = Math.max(1, r.h);
+        const pad = Math.ceil(s.strokeWidth) + 2;
+        l.x = r.x - pad; l.y = r.y - pad;
+      }
+      rasterizeShape(l);
+      break;
+    }
+  }
+  notify();
+}
+
+function pointerUp() {
+  if (!drag) return;
+  if (drag.mode === 'select' && state.selection && (state.selection.w < 2 || state.selection.h < 2))
+    state.selection = null;
+  if (drag.mode === 'shape') say('Form erstellt – Größe und Farbe bleiben über die Ebene änderbar');
+  drag = null;
+  notify();
+}
+
+const isDragging = () => !!drag;
+
+function normRect(a, b, square) {
+  let w = b.x - a.x, h = b.y - a.y;
+  if (square) { const s = Math.max(Math.abs(w), Math.abs(h)); w = Math.sign(w || 1) * s; h = Math.sign(h || 1) * s; }
+  return { x: Math.min(a.x, a.x + w), y: Math.min(a.y, a.y + h), w: Math.abs(w), h: Math.abs(h) };
+}
+
+/* ---------------- Overlay (Griffe, Auswahl) ---------------- */
+
+function drawOverlay(ctx) {
+  const z = state.zoom;
+  const P = page();
+  if (!P) return;
+  ctx.setTransform(z, 0, 0, z, 0, 0);
+  ctx.clearRect(0, 0, P.width, P.height);
+  ctx.lineWidth = 1 / z;
+
+  const dash = (r, color) => {
+    ctx.save();
+    ctx.strokeStyle = '#000'; ctx.setLineDash([5 / z, 4 / z]);
+    ctx.strokeRect(r.x, r.y, r.w, r.h);
+    ctx.strokeStyle = color; ctx.lineDashOffset = 5 / z;
+    ctx.strokeRect(r.x, r.y, r.w, r.h);
+    ctx.restore();
+  };
+
+  if (state.selection) dash(state.selection, '#fff');
+  if (cropRect && cropRect.w > 1) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.beginPath();
+    ctx.rect(0, 0, P.width, P.height);
+    ctx.rect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+    ctx.fill('evenodd');
+    ctx.restore();
+    dash(cropRect, '#2d7ff9');
+  }
+
+  const l = activeLayer();
+  if (l && (state.tool === 'move')) {
+    const h = handlesFor(l);
+    ctx.save();
+    ctx.strokeStyle = '#2d7ff9';
+    ctx.lineWidth = 1.4 / z;
+    ctx.beginPath();
+    ctx.moveTo(h.corners[0].x, h.corners[0].y);
+    for (let i = 1; i < 4; i++) ctx.lineTo(h.corners[i].x, h.corners[i].y);
+    ctx.closePath();
+    ctx.stroke();
+
+    const mTop = { x: (h.corners[0].x + h.corners[1].x) / 2, y: (h.corners[0].y + h.corners[1].y) / 2 };
+    ctx.beginPath(); ctx.moveTo(mTop.x, mTop.y); ctx.lineTo(h.rotate.x, h.rotate.y); ctx.stroke();
+
+    const r = 4.5 / z;
+    ctx.fillStyle = '#fff';
+    for (const c of h.corners) {
+      ctx.beginPath(); ctx.rect(c.x - r, c.y - r, r * 2, r * 2); ctx.fill(); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(h.rotate.x, h.rotate.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+
+/* ================= pdfio.js ================= */
+/* Bildwerk – PDF öffnen, Seiten verwalten, PDF schreiben. */
+
+const PT_PER_PX = 72 / 96;   // Bildschirmpixel -> PDF-Punkte
+const MAX_RENDER_PX = 2600;  // Deckel gegen riesige Seiten-Canvas
+
+const pdfSources = new Map(); // docId -> Uint8Array (Originaldatei)
+
+async function libs() { return window.bildwerkLibs ? await window.bildwerkLibs : {}; }
+
+async function pdfjsReady() {
+  const l = await libs();
+  if (!l.pdfjs?.ok) throw new Error('pdf.js ist nicht verfügbar – siehe vendor/README.md');
+  return window.pdfjsLib;
+}
+
+async function pdfLibReady() {
+  const l = await libs();
+  if (!l.pdflib?.ok) throw new Error('pdf-lib ist nicht verfügbar – siehe vendor/README.md');
+  return window.PDFLib;
+}
+
+/* ---------------- Import ---------------- */
+
+async function importPdf(arrayBuffer, { append = false, name = 'Dokument.pdf' } = {}) {
+  const pdfjsLib = await pdfjsReady();
+  const original = new Uint8Array(arrayBuffer.slice(0)); // Kopie: pdf.js entleert den Puffer
+  const docId = newId();
+
+  const task = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
+  const pdf = await task.promise;
+  pdfSources.set(docId, original);
+
+  const pages = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const pg = await pdf.getPage(i);
+    const base = pg.getViewport({ scale: 1 });
+    let scale = 2;
+    if (base.width * scale > MAX_RENDER_PX) scale = MAX_RENDER_PX / base.width;
+    if (base.height * scale > MAX_RENDER_PX) scale = MAX_RENDER_PX / base.height;
+    const vp = pg.getViewport({ scale });
+
+    const c = makeCanvas(vp.width, vp.height);
+    await pg.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+
+    const p = createPage(vp.width, vp.height, '#ffffff');
+    p.pdfSource = { docId, index: i - 1 };
+    p.pdfPoints = { w: base.width, h: base.height };
+    p.pdfRotate = (pg.rotate || 0) % 360;
+    const layer = createLayer({ name: `PDF-Seite ${i}`, canvas: c });
+    layer.pdfBase = true;
+    p.layers.push(layer);
+    p.activeLayerId = layer.id;
+    pages.push(p);
+  }
+
+  if (append && state.pages.length) {
+    state.pages.push(...pages);
+    say(`${pages.length} Seite(n) angehängt`);
+  } else {
+    state.pages = pages;
+    state.active = 0;
+    state.name = name.replace(/\.pdf$/i, '');
+    say(`${pages.length} Seite(n) geladen`);
+  }
+  notify();
+  return pages.length;
+}
+
+/* ---------------- Seitenverwaltung ---------------- */
+
+function addBlankPage(w, h) {
+  commit('Seite anhängen');
+  const cur = page();
+  const p = createPage(w || cur?.width || 1240, h || cur?.height || 1754, '#ffffff');
+  state.pages.push(p);
+  state.active = state.pages.length - 1;
+  notify();
+}
+
+function duplicatePage() {
+  const p = page();
+  if (!p) return;
+  commit('Seite duplizieren');
+  const copy = {
+    ...p, id: newId(),
+    layers: p.layers.map(l => ({ ...l, id: newId(), adjust: { ...l.adjust },
+      text: l.text ? { ...l.text } : null, shape: l.shape ? { ...l.shape } : null })),
+  };
+  state.pages.splice(state.active + 1, 0, copy);
+  state.active++;
+  notify();
+}
+
+function deletePage() {
+  if (state.pages.length <= 1) { say('Die letzte Seite lässt sich nicht löschen'); return; }
+  commit('Seite löschen');
+  state.pages.splice(state.active, 1);
+  state.active = Math.min(state.active, state.pages.length - 1);
+  notify();
+}
+
+/** Dreht die Seite um 90°; der Inhalt wird dabei auf eine Ebene reduziert. */
+function rotatePage() {
+  const p = page();
+  if (!p) return;
+  commit('Seite drehen');
+  const flat = pageToCanvas(p, 1, true);
+  const out = makeCanvas(flat.height, flat.width);
+  const ctx = out.getContext('2d');
+  ctx.translate(out.width / 2, out.height / 2);
+  ctx.rotate(Math.PI / 2);
+  ctx.drawImage(flat, -flat.width / 2, -flat.height / 2);
+
+  p.width = out.width; p.height = out.height;
+  if (p.pdfPoints) p.pdfPoints = { w: p.pdfPoints.h, h: p.pdfPoints.w };
+  p.pdfSource = null; // gedrehte Seite wird beim Export neu gerastert
+  const layer = createLayer({ name: 'Seite (gedreht)', canvas: out });
+  p.layers = [layer];
+  p.activeLayerId = layer.id;
+  notify();
+}
+
+function movePage(from, to) {
+  if (to < 0 || to >= state.pages.length) return;
+  commit('Seiten umsortieren');
+  const [p] = state.pages.splice(from, 1);
+  state.pages.splice(to, 0, p);
+  state.active = to;
+  notify();
+}
+
+/* ---------------- Export ---------------- */
+
+const STD_FONTS = [
+  [/courier|mono/i, 'Courier'],
+  [/times|georgia|garamond|serif/i, 'TimesRoman'],
+];
+
+function standardFontFor(t) {
+  let base = 'Helvetica';
+  for (const [re, name] of STD_FONTS) if (re.test(t.family)) { base = name; break; }
+  const bold = Number(t.weight) >= 600;
+  const italic = !!t.italic;
+  if (base === 'TimesRoman') {
+    if (bold && italic) return 'TimesRomanBoldItalic';
+    if (bold) return 'TimesRomanBold';
+    if (italic) return 'TimesRomanItalic';
+    return 'TimesRoman';
+  }
+  const suffix = bold && italic ? 'BoldOblique' : bold ? 'Bold' : italic ? 'Oblique' : '';
+  return base + suffix;
+}
+
+/** Textebene, die sich verlustfrei als echter PDF-Text schreiben lässt? */
+function isVectorizableText(l) {
+  return l.type === 'text' && l.visible && l.opacity > 0.99 &&
+    Math.abs(l.rot) < 1e-6 && l.sx > 0 && l.sy > 0 &&
+    Math.abs(l.sx - l.sy) < 1e-6 &&
+    l.blend === 'source-over' && (!l.text.strokeWidth) &&
+    /^[\x20-\x7E -ÿ\n]*$/.test(l.text.content || '');
+}
+
+function hexRgb(PDFLib, hex) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '#000000');
+  const v = m ? [1, 2, 3].map(i => parseInt(m[i], 16) / 255) : [0, 0, 0];
+  return PDFLib.rgb(v[0], v[1], v[2]);
+}
+
+async function canvasToBytes(canvas, format, quality) {
+  const type = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+  const blob = await new Promise(r => canvas.toBlob(r, type, quality));
+  return new Uint8Array(await blob.arrayBuffer());
+}
+
+/** Seite ohne die Ausnahmeebenen rendern (transparentes Overlay). */
+function overlayCanvas(p, skipIds, scale) {
+  const clone = { ...p, bgColor: null, layers: p.layers.filter(l => !skipIds.has(l.id)) };
+  if (!clone.layers.length) return null;
+  return pageToCanvas(clone, scale, true);
+}
+
+/**
+ * mode: 'hybrid' behält Originalseiten (Text bleibt Text) und stempelt Änderungen auf,
+ *       'flat' rendert jede Seite komplett als Bild.
+ */
+async function exportPdf({ mode = 'hybrid', format = 'jpeg', quality = 0.9, scale = 1 } = {}) {
+  const PDFLib = await pdfLibReady();
+  const { PDFDocument, StandardFonts, degrees } = PDFLib;
+  const out = await PDFDocument.create();
+  const srcDocs = new Map();
+  const fontCache = new Map();
+
+  for (const p of state.pages) {
+    let done = false;
+
+    if (mode === 'hybrid' && p.pdfSource && pdfSources.has(p.pdfSource.docId) && !p.pdfRotate) {
+      try {
+        const key = p.pdfSource.docId;
+        if (!srcDocs.has(key))
+          srcDocs.set(key, await PDFDocument.load(pdfSources.get(key), { ignoreEncryption: true }));
+        const base = p.layers.find(l => l.pdfBase);
+        const baseUntouched = base && base.visible && base.opacity > 0.99 &&
+          base.x === 0 && base.y === 0 && base.sx === 1 && base.sy === 1 && base.rot === 0;
+
+        if (baseUntouched) {
+          const [copied] = await out.copyPages(srcDocs.get(key), [p.pdfSource.index]);
+          const pdfPage = out.addPage(copied);
+          const pw = pdfPage.getWidth(), ph = pdfPage.getHeight();
+          const k = pw / p.width; // Pixel -> Punkte
+
+          const skip = new Set([base.id]);
+          for (const l of p.layers) {
+            if (!isVectorizableText(l)) continue;
+            const t = l.text;
+            const fontName = standardFontFor(t);
+            if (!fontCache.has(fontName))
+              fontCache.set(fontName, await out.embedFont(StandardFonts[fontName]));
+            const font = fontCache.get(fontName);
+            const size = t.size * l.sx * k;
+            const pad = Math.ceil(t.size * 0.35 + t.strokeWidth * 2 + 4);
+            const lines = String(t.content ?? '').split('\n');
+            lines.forEach((line, i) => {
+              const yDoc = l.y + (pad + t.size * t.lineHeight * i + t.size * 0.82) * l.sy;
+              let xDoc = l.x + pad * l.sx;
+              if (t.align !== 'left') {
+                const wText = font.widthOfTextAtSize(line, size);
+                const wBox = (l.canvas.width - pad * 2) * l.sx * k;
+                xDoc += (t.align === 'center' ? (wBox - wText) / 2 : wBox - wText) / k;
+              }
+              pdfPage.drawText(line, {
+                x: xDoc * k, y: ph - yDoc * k, size, font,
+                color: hexRgb(PDFLib, t.color),
+                ...(t.spacing ? { characterSpacing: t.spacing * l.sx * k } : {}),
+              });
+            });
+            skip.add(l.id);
+          }
+
+          const ov = overlayCanvas(p, skip, scale);
+          if (ov) {
+            const img = await out.embedPng(await canvasToBytes(ov, 'png', 1));
+            pdfPage.drawImage(img, { x: 0, y: 0, width: pw, height: ph });
+          }
+          done = true;
+        }
+      } catch (err) {
+        console.warn('Originalseite konnte nicht übernommen, wird gerastert:', err);
+      }
+    }
+
+    if (!done) {
+      const canvas = pageToCanvas(p, scale, false);
+      const bytes = await canvasToBytes(canvas, format, quality);
+      const img = format === 'jpeg' ? await out.embedJpg(bytes) : await out.embedPng(bytes);
+      const pw = (p.pdfPoints?.w) || p.width * PT_PER_PX;
+      const ph = (p.pdfPoints?.h) || p.height * PT_PER_PX;
+      const pdfPage = out.addPage([pw, ph]);
+      pdfPage.drawImage(img, { x: 0, y: 0, width: pw, height: ph });
+    }
+  }
+
+  out.setTitle(state.name || 'Bildwerk-Dokument');
+  out.setProducer('Bildwerk');
+  out.setCreator('Bildwerk – lokaler Bild- und PDF-Editor');
+  return new Blob([await out.save()], { type: 'application/pdf' });
+}
+
+/* ================= ui.js ================= */
+/* Bildwerk – Oberfläche: Bühne, Panels, Ebenenliste, Dialoge. */
+
+
+
+const $ = (sel) => document.querySelector(sel);
+const el = (tag, props = {}, kids = []) => {
+  const n = Object.assign(document.createElement(tag), props);
+  for (const k of [].concat(kids)) n.append(k);
+  return n;
+};
+
+const canvas = () => $('#canvas');
+const overlay = () => $('#overlay');
+const thumbCache = new WeakMap();
+let renderQueued = false;
+let stripTimer = 0;
+
+/* ---------------- Aufbau ---------------- */
+
+function initUI() {
+  buildToolbar();
+  buildBlendSelect();
+  buildAdjustments();
+  buildFontSelect();
+  bindPanels();
+  bindStage();
+  on('change', scheduleRender);
+  on('status', (m) => { $('#status-msg').textContent = m || ''; });
+  buildToolOptions();
+}
+
+function buildToolbar() {
+  const bar = $('#toolbar');
+  bar.textContent = '';
+  for (const t of TOOLS) {
+    const b = el('button', { className: 'tool', title: t.label, textContent: t.icon });
+    b.dataset.tool = t.id;
+    b.onclick = () => setTool(t.id);
+    bar.append(b);
+  }
+  syncToolbar();
+}
+
+function setTool(id) {
+  state.tool = id;
+  if (id !== 'crop') clearCrop();
+  syncToolbar();
+  buildToolOptions();
+  scheduleRender();
+}
+
+function syncToolbar() {
+  document.querySelectorAll('.tool').forEach(b => b.classList.toggle('active', b.dataset.tool === state.tool));
+  const cursors = { move: 'move', brush: 'crosshair', eraser: 'crosshair', bucket: 'crosshair',
+    eyedrop: 'crosshair', text: 'text', select: 'crosshair', crop: 'crosshair', hand: 'grab' };
+  $('#stage').style.cursor = cursors[state.tool] || 'crosshair';
+}
+
+function num(label, key, min, max, step, suffix = '') {
+  const o = el('output', { textContent: fmt(opts[key], suffix) });
+  const i = el('input', { type: 'range', min, max, step, value: opts[key] });
+  i.oninput = () => { opts[key] = Number(i.value); o.textContent = fmt(opts[key], suffix); };
+  return el('div', { className: 'opt' }, [el('span', { textContent: label }), i, o]);
+}
+const fmt = (v, s) => (Math.round(v * 100) / 100) + s;
+
+function check(label, key) {
+  const i = el('input', { type: 'checkbox', checked: !!opts[key] });
+  i.onchange = () => { opts[key] = i.checked; };
+  const l = el('label', { className: 'opt' }, [i, el('span', { textContent: label })]);
+  return l;
+}
+
+function buildToolOptions() {
+  const box = $('#tool-options');
+  box.textContent = '';
+  const t = state.tool;
+  if (t === 'brush' || t === 'eraser') {
+    box.append(num('Größe', 'size', 1, 400, 1, ' px'));
+    box.append(num('Härte', 'hardness', 0, 1, 0.05));
+    box.append(num('Deckkraft', 'flow', 0.02, 1, 0.02));
+    box.append(hint('Alt-Taste malt mit der Hintergrundfarbe'));
+  } else if (t === 'bucket') {
+    box.append(num('Toleranz', 'tolerance', 0, 160, 1));
+    box.append(hint('Mit aktiver Auswahl wird nur diese gefüllt'));
+  } else if (t === 'text') {
+    box.append(num('Schriftgröße', 'fontSize', 6, 400, 1, ' px'));
+    box.append(hint('Auf die Bühne klicken, dann rechts unter „Schrift“ bearbeiten'));
+  } else if (t === 'rect' || t === 'ellipse') {
+    box.append(check('Gefüllt', 'fillShape'));
+    box.append(num('Konturstärke', 'strokeWidth', 0, 60, 1, ' px'));
+    if (t === 'rect') box.append(num('Eckenradius', 'radius', 0, 200, 1, ' px'));
+  } else if (t === 'line') {
+    box.append(num('Stärke', 'strokeWidth', 1, 60, 1, ' px'));
+  } else if (t === 'crop') {
+    box.append(hint('Bereich aufziehen, dann mit Eingabe bestätigen (Esc bricht ab)'));
+  } else if (t === 'move') {
+    box.append(hint('Ecken ziehen skaliert (Umschalt = proportional), der Punkt darüber dreht'));
+  } else if (t === 'select') {
+    box.append(hint('Entf leert die Auswahl, Strg+D hebt sie auf'));
+  } else if (t === 'eyedrop') {
+    box.append(hint('Klick nimmt die Vordergrundfarbe auf, Alt+Klick die Hintergrundfarbe'));
+  } else if (t === 'hand') {
+    box.append(hint('Ziehen verschiebt den Bildausschnitt'));
+  }
+}
+const hint = (text) => el('div', { className: 'opt', textContent: text });
+
+function buildBlendSelect() {
+  const s = $('#l-blend');
+  s.textContent = '';
+  for (const [v, label] of BLEND_MODES) s.append(el('option', { value: v, textContent: label }));
+  s.onchange = () => { const l = activeLayer(); if (!l) return; commit('Modus'); l.blend = s.value; notify(); };
+}
+
+function buildFontSelect() {
+  const s = $('#t-family');
+  s.textContent = '';
+  for (const [v, label] of fontOptions()) s.append(el('option', { value: v, textContent: label }));
+}
+const refreshFontSelect = () => {
+  const cur = $('#t-family').value;
+  buildFontSelect();
+  const l = activeLayer();
+  $('#t-family').value = (l?.text?.family) || cur;
+};
+
+function buildAdjustments() {
+  const box = $('#adjust-list');
+  box.textContent = '';
+  for (const d of ADJUSTMENTS) {
+    const out = el('output', { textContent: d.def + d.unit });
+    const inp = el('input', { type: 'range', min: d.min, max: d.max, step: 1, value: d.def });
+    inp.dataset.adj = d.key;
+    let started = false;
+    inp.onpointerdown = () => { started = false; };
+    inp.oninput = () => {
+      const l = activeLayer();
+      if (!l) return;
+      if (!started) { commit('Anpassung'); started = true; }
+      l.adjust[d.key] = Number(inp.value);
+      out.textContent = inp.value + d.unit;
+      notify();
+    };
+    inp.onchange = () => { started = false; };
+    box.append(el('div', { className: 'adjust-row' }, [el('label', { textContent: d.label }), inp, out]));
+  }
+}
+
+/* ---------------- Panels verdrahten ---------------- */
+
+function bindPanels() {
+  $('#fg-color').oninput = (e) => { state.fg = e.target.value; pushRecent(state.fg); notify(); };
+  $('#bg-color').oninput = (e) => { state.bg = e.target.value; notify(); };
+
+  $('#l-opacity').oninput = (e) => {
+    const l = activeLayer(); if (!l) return;
+    l.opacity = Number(e.target.value) / 100;
+    $('#op-val').textContent = e.target.value + '%';
+    notify();
+  };
+  $('#l-opacity').onpointerdown = () => { if (activeLayer()) commit('Deckkraft'); };
+
+  const textFields = {
+    't-content': 'content', 't-family': 'family', 't-size': 'size', 't-weight': 'weight',
+    't-line': 'lineHeight', 't-spacing': 'spacing', 't-align': 'align', 't-color': 'color',
+    't-stroke': 'stroke', 't-strokew': 'strokeWidth', 't-italic': 'italic',
+  };
+  for (const [id, key] of Object.entries(textFields)) {
+    const node = $('#' + id);
+    let armed = false;
+    node.addEventListener('focus', () => { armed = false; });
+    node.addEventListener('input', () => {
+      const l = activeLayer();
+      if (!l || l.type !== 'text') return;
+      if (!armed) { commit('Text ändern'); armed = true; }
+      let v = node.type === 'checkbox' ? node.checked : node.value;
+      if (['size', 'lineHeight', 'spacing', 'strokeWidth'].includes(key)) v = Number(v);
+      l.text[key] = v;
+      refreshLayer(l);
+      notify();
+    });
+    node.addEventListener('change', () => { armed = false; });
+  }
+}
+
+function pushRecent(hex) {
+  if (state.recentColors[0] === hex) return;
+  state.recentColors = [hex, ...state.recentColors.filter(c => c !== hex)].slice(0, 12);
+}
+
+/* ---------------- Bühne ---------------- */
+
+function stagePoint(ev) {
+  const r = canvas().getBoundingClientRect();
+  return { x: (ev.clientX - r.left) / state.zoom, y: (ev.clientY - r.top) / state.zoom };
+}
+
+function bindStage() {
+  const stage = $('#stage');
+  let panning = null;
+
+  stage.addEventListener('pointerdown', (ev) => {
+    if (!page()) return;
+    if (ev.button === 1 || state.tool === 'hand' || (ev.button === 0 && ev.spaceKey)) {
+      const wrap = $('#stage-wrap');
+      panning = { x: ev.clientX, y: ev.clientY, l: wrap.scrollLeft, t: wrap.scrollTop };
+      stage.style.cursor = 'grabbing';
+      stage.setPointerCapture(ev.pointerId);
+      return;
+    }
+    if (ev.button !== 0) return;
+    stage.setPointerCapture(ev.pointerId);
+    pointerDown(stagePoint(ev), ev);
+  });
+
+  stage.addEventListener('pointermove', (ev) => {
+    const p = stagePoint(ev);
+    $('#status-pos').textContent = page() ? `x ${Math.round(p.x)}  y ${Math.round(p.y)}` : '';
+    if (panning) {
+      const wrap = $('#stage-wrap');
+      wrap.scrollLeft = panning.l - (ev.clientX - panning.x);
+      wrap.scrollTop = panning.t - (ev.clientY - panning.y);
+      return;
+    }
+    pointerMove(p, ev);
+  });
+
+  const end = (ev) => {
+    if (panning) { panning = null; syncToolbar(); return; }
+    pointerUp(stagePoint(ev), ev);
+  };
+  stage.addEventListener('pointerup', end);
+  stage.addEventListener('pointercancel', end);
+
+  $('#stage-wrap').addEventListener('wheel', (ev) => {
+    if (!ev.ctrlKey) return;
+    ev.preventDefault();
+    setZoom(state.zoom * (ev.deltaY < 0 ? 1.12 : 1 / 1.12));
+  }, { passive: false });
+}
+
+function setZoom(z) {
+  state.zoom = Math.min(16, Math.max(0.02, z));
+  scheduleRender();
+}
+
+function fitZoom() {
+  const p = page();
+  if (!p) return;
+  const wrap = $('#stage-wrap');
+  const pad = 52;
+  setZoom(Math.min((wrap.clientWidth - pad) / p.width, (wrap.clientHeight - pad) / p.height, 4));
+}
+
+/* ---------------- Rendering ---------------- */
+
+function scheduleRender() {
+  if (renderQueued) return;
+  renderQueued = true;
+  requestAnimationFrame(() => { renderQueued = false; renderAll(); });
+}
+
+function renderAll() {
+  const p = page();
+  const c = canvas(), o = overlay();
+  if (!p) return;
+  const w = Math.round(p.width * state.zoom), h = Math.round(p.height * state.zoom);
+  for (const cv of [c, o]) {
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    cv.style.width = w + 'px';
+    cv.style.height = h + 'px';
+  }
+  $('#stage').style.width = w + 'px';
+  $('#stage').style.height = h + 'px';
+
+  renderPage(p, c.getContext('2d'), { scale: state.zoom });
+  drawOverlay(o.getContext('2d'));
+
+  syncPanels();
+  renderLayerList();
+  renderRecentColors();
+  renderPageStrip();
+
+  $('#zoom-label').textContent = Math.round(state.zoom * 100) + '%';
+  $('#status-doc').textContent =
+    `${state.name} · ${p.width}×${p.height} px · Seite ${state.active + 1}/${state.pages.length} · ${p.layers.length} Ebene(n)`;
+}
+
+function syncPanels() {
+  const l = activeLayer();
+  $('#fg-color').value = state.fg;
+  $('#bg-color').value = state.bg;
+
+  const isText = !!l && l.type === 'text';
+  $('#panel-text').hidden = !isText;
+  if (isText && document.activeElement?.id?.startsWith('t-') !== true) {
+    const t = l.text;
+    $('#t-content').value = t.content;
+    $('#t-family').value = t.family;
+    $('#t-size').value = t.size;
+    $('#t-weight').value = t.weight;
+    $('#t-line').value = t.lineHeight;
+    $('#t-spacing').value = t.spacing;
+    $('#t-align').value = t.align;
+    $('#t-color').value = t.color;
+    $('#t-stroke').value = t.stroke;
+    $('#t-strokew').value = t.strokeWidth;
+    $('#t-italic').checked = t.italic;
+  }
+
+  if (l) {
+    $('#l-opacity').value = Math.round(l.opacity * 100);
+    $('#op-val').textContent = Math.round(l.opacity * 100) + '%';
+    $('#l-blend').value = l.blend;
+    for (const d of ADJUSTMENTS) {
+      const inp = document.querySelector(`input[data-adj="${d.key}"]`);
+      if (inp && document.activeElement !== inp) {
+        inp.value = l.adjust[d.key];
+        inp.nextElementSibling.textContent = l.adjust[d.key] + d.unit;
+      }
+    }
+  }
+}
+
+function thumbFor(layer) {
+  let url = thumbCache.get(layer.canvas);
+  if (!url) {
+    const S = 32;
+    const t = document.createElement('canvas');
+    t.width = t.height = S;
+    const s = Math.min(S / layer.canvas.width, S / layer.canvas.height);
+    const w = Math.max(1, layer.canvas.width * s), h = Math.max(1, layer.canvas.height * s);
+    t.getContext('2d').drawImage(layer.canvas, (S - w) / 2, (S - h) / 2, w, h);
+    url = t.toDataURL();
+    thumbCache.set(layer.canvas, url);
+  }
+  return url;
+}
+
+function renderLayerList() {
+  const box = $('#layer-list');
+  const act = activeLayer();
+  box.textContent = '';
+  for (const l of [...layers()].reverse()) {
+    const row = el('div', { className: 'layer' + (l === act ? ' active' : '') + (l.visible ? '' : ' hidden-layer') });
+    const eye = el('button', { className: 'eye', textContent: l.visible ? '👁' : '—', title: 'Sichtbarkeit' });
+    eye.onclick = (e) => { e.stopPropagation(); commit('Sichtbarkeit'); l.visible = !l.visible; notify(); };
+    const img = el('img', { className: 'thumb', src: thumbFor(l) });
+    const name = el('div', { className: 'name', textContent: l.name });
+    name.ondblclick = () => {
+      const inp = el('input', { type: 'text', value: l.name });
+      name.textContent = ''; name.append(inp); inp.focus(); inp.select();
+      const done = () => { commit('Umbenennen'); l.name = inp.value || l.name; notify(); };
+      inp.onblur = done;
+      inp.onkeydown = (e) => { if (e.key === 'Enter') inp.blur(); };
+    };
+    row.append(eye, img, name);
+    if (l.type !== 'raster') row.append(el('span', { className: 'badge', textContent: l.type === 'text' ? 'T' : '◇' }));
+    row.onclick = () => { setActiveLayer(l.id); notify(); };
+    box.append(row);
+  }
+}
+
+function renderRecentColors() {
+  const box = $('#recent-colors');
+  box.textContent = '';
+  for (const c of state.recentColors) {
+    const b = el('button', { title: c });
+    b.style.background = c;
+    b.onclick = () => { state.fg = c; notify(); };
+    box.append(b);
+  }
+}
+
+function renderPageStrip() {
+  const strip = $('#pagestrip');
+  strip.hidden = state.pages.length < 2;
+  if (strip.hidden) return;
+  clearTimeout(stripTimer);
+  stripTimer = setTimeout(() => {
+    strip.textContent = '';
+    state.pages.forEach((p, i) => {
+      const btn = el('button', { className: 'pagethumb' + (i === state.active ? ' active' : ''), title: `Seite ${i + 1}` });
+      const c = document.createElement('canvas');
+      const s = 62 / p.width;
+      c.width = 62; c.height = Math.max(1, Math.round(p.height * s));
+      renderPage(p, c.getContext('2d'), { scale: s });
+      btn.append(c, el('span', { textContent: i + 1 }));
+      btn.onclick = () => { state.active = i; state.selection = null; notify(); };
+      strip.append(btn);
+    });
+  }, 220);
+}
+
+/* ---------------- Dialoge ---------------- */
+
+function modal(title, fields, { okLabel = 'OK', text = '' } = {}) {
+  return new Promise(resolve => {
+    const back = $('#modal'), body = $('#modal-body');
+    $('#modal-title').textContent = title;
+    body.textContent = '';
+    if (text) body.append(el('p', { innerHTML: text }));
+
+    const inputs = {};
+    for (const f of fields || []) {
+      const wrap = el('div', { className: 'field' });
+      wrap.append(el('label', { textContent: f.label }));
+      let inp;
+      if (f.type === 'select') {
+        inp = el('select');
+        for (const [v, l] of f.options) inp.append(el('option', { value: v, textContent: l }));
+        inp.value = f.value;
+      } else if (f.type === 'checkbox') {
+        inp = el('input', { type: 'checkbox', checked: !!f.value });
+      } else {
+        inp = el('input', { type: f.type || 'text', value: f.value ?? '' });
+        if (f.min != null) inp.min = f.min;
+        if (f.max != null) inp.max = f.max;
+        if (f.step != null) inp.step = f.step;
+      }
+      inputs[f.key] = inp;
+      wrap.append(inp);
+      body.append(wrap);
+    }
+
+    $('#modal-ok').textContent = okLabel;
+    back.hidden = false;
+    setTimeout(() => Object.values(inputs)[0]?.focus(), 30);
+
+    const close = (result) => {
+      back.hidden = true;
+      $('#modal-ok').onclick = null;
+      $('#modal-cancel').onclick = null;
+      back.onkeydown = null;
+      resolve(result);
+    };
+    const accept = () => {
+      const out = {};
+      for (const [k, i] of Object.entries(inputs))
+        out[k] = i.type === 'checkbox' ? i.checked : (i.type === 'number' ? Number(i.value) : i.value);
+      close(out);
+    };
+    $('#modal-ok').onclick = accept;
+    $('#modal-cancel').onclick = () => close(null);
+    back.onkeydown = (e) => {
+      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') accept();
+      if (e.key === 'Escape') close(null);
+    };
+  });
+}
+
+function info(title, html) {
+  return modal(title, [], { okLabel: 'Schließen', text: html });
+}
+
+
+/* Namensraeume, die im Modulbetrieb aus `import * as ...` stammen */
+const F = { bakeAdjust, convolve, sharpen, edges, emboss, softBlur, pixelate,
+  noise, posterize, threshold, autoLevel, vignette, flip, rotate90,
+  floodFill, hexToRgb, rgbToHex };
+const PDF = { pdfSources, pdfjsReady, pdfLibReady, importPdf, addBlankPage,
+  duplicatePage, deletePage, rotatePage, movePage, exportPdf };
+
+/* ================= commands.js ================= */
+/* Bildwerk – Befehle aus Menü, Panels und Tastatur. */
+
+
+
+
+
+
+/* ---------------- Datei-Hilfen ---------------- */
+
+function pickFile(accept, multiple = false) {
+  return new Promise(resolve => {
+    const inp = document.querySelector('#file-input');
+    inp.value = '';
+    inp.accept = accept;
+    inp.multiple = multiple;
+    inp.onchange = () => resolve(multiple ? [...inp.files] : inp.files[0] || null);
+    inp.click();
+  });
+}
+
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+function loadImage(src) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = rej;
+    img.src = src;
+  });
+}
+
+async function fileToImage(file) {
+  const url = URL.createObjectURL(file);
+  try { return await loadImage(url); } finally { setTimeout(() => URL.revokeObjectURL(url), 2000); }
+}
+
+function imageToCanvas(img) {
+  const c = makeCanvas(img.naturalWidth || img.width, img.naturalHeight || img.height);
+  c.getContext('2d').drawImage(img, 0, 0);
+  return c;
+}
+
+/* ---------------- Dokument ---------------- */
+
+function newDocument(w, h, transparent) {
+  state.pages = [createPage(w, h, transparent ? null : '#ffffff')];
+  state.active = 0;
+  state.selection = null;
+  state.sourcePdfBytes = null;
+  PDF.pdfSources.clear();
+  resetHistory();
+  const p = page();
+  const base = createLayer({ name: 'Hintergrund', w: p.width, h: p.height });
+  p.layers.push(base);
+  p.activeLayerId = base.id;
+  state.dirty = false;
+  notify();
+  fitZoom();
+}
+
+async function openImageAsDocument(file) {
+  const img = await fileToImage(file);
+  const c = imageToCanvas(img);
+  state.pages = [createPage(c.width, c.height, null)];
+  state.active = 0;
+  state.name = file.name.replace(/\.[^.]+$/, '');
+  PDF.pdfSources.clear();
+  resetHistory();
+  const p = page();
+  const l = createLayer({ name: file.name, canvas: c });
+  p.layers.push(l);
+  p.activeLayerId = l.id;
+  state.dirty = false;
+  say(`${file.name} geöffnet (${c.width}×${c.height})`);
+  notify();
+  fitZoom();
+}
+
+async function placeImage(file) {
+  const img = await fileToImage(file);
+  const c = imageToCanvas(img);
+  commit('Bild einfügen');
+  const p = page();
+  const l = createLayer({ name: file.name, canvas: c });
+  const s = Math.min(1, p.width / c.width, p.height / c.height);
+  l.sx = l.sy = s;
+  l.x = (p.width - c.width * s) / 2;
+  l.y = (p.height - c.height * s) / 2;
+  addLayer(l);
+  say(`${file.name} als Ebene eingefügt`);
+  notify();
+}
+
+/** Datei, die auf das Fenster gezogen wurde: nach Typ einsortieren. */
+async function handleDroppedFile(file) {
+  if (file.type === 'application/pdf') {
+    say('PDF wird geladen …');
+    await PDF.importPdf(await file.arrayBuffer(), { name: file.name, append: state.pages.length > 1 });
+    resetHistory();
+    fitZoom();
+  } else if (/^image\//.test(file.type)) {
+    if (state.pages.length === 1 && layers().length === 1 && !state.dirty)
+      await openImageAsDocument(file);
+    else
+      await placeImage(file);
+  } else if (/\.bildwerk$/i.test(file.name)) {
+    await openProject(file);
+  } else {
+    say('Dateityp wird nicht unterstützt: ' + (file.type || file.name));
+  }
+}
+
+/* ---------------- Ebenenoperationen ---------------- */
+
+function ensureRaster(l) {
+  if (l.type === 'raster') return;
+  l.type = 'raster';
+  l.text = null;
+  l.shape = null;
+}
+
+function applyPixelOp(fn, label) {
+  const l = activeLayer();
+  if (!l) { say('Keine Ebene ausgewählt'); return; }
+  commit(label);
+  ensureRaster(l);
+  l.canvas = fn(l.canvas);
+  notify();
+  say(label + ' angewendet');
+}
+
+function mergeDown() {
+  const p = page();
+  const l = activeLayer();
+  const i = p.layers.indexOf(l);
+  if (i < 1) { say('Darunter liegt keine Ebene'); return; }
+  commit('Ebenen vereinen');
+  const below = p.layers[i - 1];
+  const c = makeCanvas(p.width, p.height);
+  const ctx = c.getContext('2d');
+  const tmp = { ...p, bgColor: null, layers: [below, l] };
+  renderPage(tmp, ctx, { scale: 1, transparent: true });
+  const merged = createLayer({ name: below.name, canvas: c });
+  p.layers.splice(i - 1, 2, merged);
+  p.activeLayerId = merged.id;
+  notify();
+}
+
+function flattenPage() {
+  const p = page();
+  commit('Auf Hintergrund reduzieren');
+  const c = pageToCanvas(p, 1, !p.bgColor);
+  const l = createLayer({ name: 'Hintergrund', canvas: c });
+  p.layers = [l];
+  p.activeLayerId = l.id;
+  notify();
+}
+
+function moveLayer(dir) {
+  const p = page();
+  const l = activeLayer();
+  const i = p.layers.indexOf(l);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= p.layers.length) return;
+  commit('Ebene umsortieren');
+  p.layers.splice(j, 0, p.layers.splice(i, 1)[0]);
+  notify();
+}
+
+function cropTo(rect) {
+  const p = page();
+  const r = {
+    x: Math.max(0, Math.round(rect.x)), y: Math.max(0, Math.round(rect.y)),
+    w: Math.round(rect.w), h: Math.round(rect.h),
+  };
+  if (r.w < 2 || r.h < 2) { say('Der Bereich ist zu klein'); return; }
+  commit('Zuschneiden');
+  for (const l of p.layers) { l.x -= r.x; l.y -= r.y; }
+  p.width = Math.min(r.w, 20000);
+  p.height = Math.min(r.h, 20000);
+  p.pdfSource = null;
+  p.pdfPoints = null;
+  state.selection = null;
+  clearCrop();
+  notify();
+  fitZoom();
+  say(`Zugeschnitten auf ${p.width}×${p.height}`);
+}
+
+function scaleDocument(factor) {
+  const p = page();
+  commit('Bildgröße');
+  for (const l of p.layers) {
+    l.x *= factor; l.y *= factor; l.sx *= factor; l.sy *= factor;
+  }
+  p.width = Math.round(p.width * factor);
+  p.height = Math.round(p.height * factor);
+  p.pdfSource = null;
+  notify();
+  fitZoom();
+}
+
+/* ---------------- Projektdatei ---------------- */
+
+async function saveProject() {
+  const data = {
+    format: 'bildwerk/1',
+    name: state.name,
+    fonts: serializeFonts(),
+    pages: state.pages.map(p => ({
+      width: p.width, height: p.height, bgColor: p.bgColor,
+      activeLayerId: p.activeLayerId,
+      layers: p.layers.map(l => ({
+        id: l.id, name: l.name, type: l.type, visible: l.visible, opacity: l.opacity,
+        blend: l.blend, x: l.x, y: l.y, rot: l.rot, sx: l.sx, sy: l.sy,
+        adjust: l.adjust, text: l.text, shape: l.shape,
+        image: l.type === 'raster' ? l.canvas.toDataURL('image/png') : null,
+      })),
+    })),
+  };
+  download(new Blob([JSON.stringify(data)], { type: 'application/json' }),
+    (state.name || 'projekt') + '.bildwerk');
+  state.dirty = false;
+  say('Projekt gespeichert');
+}
+
+async function openProject(file) {
+  const data = JSON.parse(await file.text());
+  if (data.format !== 'bildwerk/1') throw new Error('Unbekanntes Projektformat');
+  await restoreFonts(data.fonts);
+  const pages = [];
+  for (const sp of data.pages) {
+    const p = createPage(sp.width, sp.height, sp.bgColor);
+    for (const sl of sp.layers) {
+      const l = createLayer({ name: sl.name, type: sl.type });
+      Object.assign(l, {
+        visible: sl.visible, opacity: sl.opacity, blend: sl.blend,
+        x: sl.x, y: sl.y, rot: sl.rot, sx: sl.sx, sy: sl.sy,
+        adjust: { ...defaultAdjust(), ...sl.adjust }, text: sl.text, shape: sl.shape,
+      });
+      if (sl.image) l.canvas = imageToCanvas(await loadImage(sl.image));
+      else refreshLayer(l);
+      p.layers.push(l);
+    }
+    p.activeLayerId = p.layers[p.layers.length - 1]?.id ?? null;
+    pages.push(p);
+  }
+  state.pages = pages;
+  state.active = 0;
+  state.name = data.name || 'Projekt';
+  resetHistory();
+  refreshFontSelect();
+  notify();
+  fitZoom();
+  say('Projekt geladen');
+}
+
+/* ---------------- Export ---------------- */
+
+async function exportImage(type, quality) {
+  const p = page();
+  const c = pageToCanvas(p, 1, type === 'image/png' || type === 'image/webp' ? !p.bgColor : false);
+  const blob = await new Promise(r => c.toBlob(r, type, quality));
+  const ext = type.split('/')[1].replace('jpeg', 'jpg');
+  download(blob, `${state.name || 'bild'}.${ext}`);
+  say(`Exportiert als ${ext.toUpperCase()} (${c.width}×${c.height})`);
+}
+
+async function exportPdfDialog() {
+  const res = await modal('Als PDF exportieren', [
+    { key: 'mode', label: 'Modus', type: 'select', value: 'hybrid', options: [
+      ['hybrid', 'Original beibehalten, Änderungen aufsetzen'],
+      ['flat', 'Alles als Bild rastern'],
+    ] },
+    { key: 'format', label: 'Bildkompression der gerasterten Seiten', type: 'select', value: 'jpeg', options: [
+      ['jpeg', 'JPEG (klein)'], ['png', 'PNG (verlustfrei, groß)'],
+    ] },
+    { key: 'quality', label: 'JPEG-Qualität (0,1–1,0)', type: 'number', value: 0.9, min: 0.1, max: 1, step: 0.05 },
+  ], { okLabel: 'Exportieren', text:
+    'Im ersten Modus bleiben Text und Vektoren geöffneter PDFs erhalten; ' +
+    'neue Textebenen werden – wo möglich – als echter PDF-Text geschrieben.' });
+  if (!res) return;
+  say('PDF wird erzeugt …');
+  const blob = await PDF.exportPdf({ mode: res.mode, format: res.format, quality: res.quality });
+  download(blob, `${state.name || 'dokument'}.pdf`);
+  say(`PDF mit ${state.pages.length} Seite(n) exportiert`);
+}
+
+/* ---------------- Befehlsverteiler ---------------- */
+
+async function run(cmd) {
+  const p = page();
+  const l = activeLayer();
+
+  switch (cmd) {
+    /* --- Datei --- */
+    case 'new': {
+      const r = await modal('Neues Dokument', [
+        { key: 'w', label: 'Breite (px)', type: 'number', value: p?.width || 1600, min: 1, max: 20000 },
+        { key: 'h', label: 'Höhe (px)', type: 'number', value: p?.height || 1000, min: 1, max: 20000 },
+        { key: 'transparent', label: 'Transparenter Hintergrund', type: 'checkbox', value: false },
+      ], { okLabel: 'Anlegen' });
+      if (r) { state.name = 'Unbenannt'; newDocument(r.w, r.h, r.transparent); }
+      break;
+    }
+    case 'open-image': {
+      const f = await pickFile('image/*');
+      if (f) await openImageAsDocument(f);
+      break;
+    }
+    case 'place-image': {
+      const f = await pickFile('image/*');
+      if (f) await placeImage(f);
+      break;
+    }
+    case 'open-pdf': {
+      const f = await pickFile('application/pdf');
+      if (f) { say('PDF wird geladen …'); await PDF.importPdf(await f.arrayBuffer(), { name: f.name }); resetHistory(); fitZoom(); }
+      break;
+    }
+    case 'pdf-append': {
+      const f = await pickFile('application/pdf');
+      if (f) { commit('PDF anhängen'); await PDF.importPdf(await f.arrayBuffer(), { append: true, name: f.name }); }
+      break;
+    }
+    case 'save-project': await saveProject(); break;
+    case 'open-project': {
+      const f = await pickFile('.bildwerk,application/json');
+      if (f) await openProject(f);
+      break;
+    }
+    case 'export-png': await exportImage('image/png'); break;
+    case 'export-webp': await exportImage('image/webp', 0.92); break;
+    case 'export-jpg': {
+      const r = await modal('JPEG exportieren', [
+        { key: 'q', label: 'Qualität (0,1–1,0)', type: 'number', value: 0.92, min: 0.1, max: 1, step: 0.02 },
+      ], { okLabel: 'Exportieren' });
+      if (r) await exportImage('image/jpeg', r.q);
+      break;
+    }
+    case 'export-pdf': await exportPdfDialog(); break;
+
+    /* --- Bearbeiten --- */
+    case 'undo': if (undo()) { notify(); say('Rückgängig'); } else say('Nichts zum Rückgängigmachen'); break;
+    case 'redo': if (redo()) { notify(); say('Wiederholt'); } else say('Nichts zum Wiederholen'); break;
+    case 'copy-layer': {
+      if (!l) break;
+      commit('Ebene duplizieren');
+      const copy = createLayer({ name: l.name + ' Kopie', type: l.type });
+      Object.assign(copy, {
+        visible: l.visible, opacity: l.opacity, blend: l.blend,
+        x: l.x + 12, y: l.y + 12, rot: l.rot, sx: l.sx, sy: l.sy,
+        adjust: { ...l.adjust }, text: l.text ? { ...l.text } : null,
+        shape: l.shape ? { ...l.shape } : null, canvas: cloneCanvas(l.canvas),
+      });
+      addLayer(copy);
+      notify();
+      break;
+    }
+    case 'delete-layer': {
+      if (!l) break;
+      if (layers().length <= 1) { say('Die letzte Ebene lässt sich nicht löschen'); break; }
+      commit('Ebene löschen');
+      removeLayer(l.id);
+      notify();
+      break;
+    }
+    case 'clear-selection': {
+      if (!l || !state.selection) { say('Keine Auswahl'); break; }
+      commit('Auswahl leeren');
+      const ctx = beginPixelEdit(l);
+      const s = state.selection;
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      const m = layerMatrix(l).inverse();
+      const pts = [[s.x, s.y], [s.x + s.w, s.y], [s.x + s.w, s.y + s.h], [s.x, s.y + s.h]]
+        .map(([x, y]) => m.transformPoint(new DOMPoint(x, y)));
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      pts.slice(1).forEach(q => ctx.lineTo(q.x, q.y));
+      ctx.closePath();
+      ctx.clip();
+      ctx.clearRect(0, 0, l.canvas.width, l.canvas.height);
+      ctx.restore();
+      notify();
+      break;
+    }
+    case 'select-none': state.selection = null; clearCrop(); notify(); break;
+    case 'crop-to-selection': {
+      const r = getCropRect() || state.selection;
+      if (!r) { say('Erst einen Bereich auswählen'); break; }
+      cropTo(r);
+      break;
+    }
+    case 'resize-doc': {
+      const r = await modal('Dokumentgröße (Leinwand)', [
+        { key: 'w', label: 'Breite (px)', type: 'number', value: p.width, min: 1, max: 20000 },
+        { key: 'h', label: 'Höhe (px)', type: 'number', value: p.height, min: 1, max: 20000 },
+      ], { okLabel: 'Ändern', text: 'Die Ebenen behalten ihre Größe und Position.' });
+      if (!r) break;
+      commit('Dokumentgröße');
+      p.width = r.w; p.height = r.h; p.pdfSource = null;
+      notify(); fitZoom();
+      break;
+    }
+    case 'resize-image': {
+      const r = await modal('Bildgröße skalieren', [
+        { key: 'w', label: 'Neue Breite (px)', type: 'number', value: p.width, min: 1, max: 20000 },
+      ], { okLabel: 'Skalieren', text: 'Seitenverhältnis und alle Ebenen werden mitskaliert.' });
+      if (!r) break;
+      scaleDocument(r.w / p.width);
+      break;
+    }
+
+    /* --- Ebene --- */
+    case 'add-layer': {
+      commit('Neue Ebene');
+      addLayer(createLayer({ name: 'Ebene ' + (layers().length + 1), w: p.width, h: p.height }));
+      notify();
+      break;
+    }
+    case 'add-text': {
+      commit('Textebene');
+      const t = defaultText('Neuer Text');
+      t.size = opts.fontSize; t.color = state.fg;
+      const layer = createLayer({ name: 'Text', type: 'text', text: t });
+      refreshLayer(layer);
+      layer.x = p.width / 2 - layer.canvas.width / 2;
+      layer.y = p.height / 2 - layer.canvas.height / 2;
+      addLayer(layer);
+      setTool('move');
+      notify();
+      break;
+    }
+    case 'merge-down': mergeDown(); break;
+    case 'flatten': flattenPage(); break;
+    case 'layer-up': moveLayer(1); break;
+    case 'layer-down': moveLayer(-1); break;
+    case 'fit-layer': {
+      if (!l) break;
+      commit('Ebene einpassen');
+      const s = Math.min(p.width / l.canvas.width, p.height / l.canvas.height);
+      l.sx = l.sy = s; l.rot = 0;
+      l.x = (p.width - l.canvas.width * s) / 2;
+      l.y = (p.height - l.canvas.height * s) / 2;
+      notify();
+      break;
+    }
+    case 'reset-transform': {
+      if (!l) break;
+      commit('Transformation zurücksetzen');
+      l.rot = 0; l.sx = 1; l.sy = 1;
+      notify();
+      break;
+    }
+    case 'rasterize-text': {
+      if (!l || l.type === 'raster') { say('Diese Ebene ist bereits gerastert'); break; }
+      commit('Rastern');
+      ensureRaster(l);
+      notify();
+      say('Ebene gerastert');
+      break;
+    }
+
+    /* --- Farben & Anpassungen --- */
+    case 'swap-colors': { const t = state.fg; state.fg = state.bg; state.bg = t; notify(); break; }
+    case 'reset-adjust': {
+      if (!l) break;
+      commit('Anpassungen zurücksetzen');
+      l.adjust = defaultAdjust();
+      notify();
+      break;
+    }
+    case 'bake-adjust': {
+      if (!l) break;
+      commit('Anpassungen einrechnen');
+      ensureRaster(l);
+      const res = F.bakeAdjust(l.canvas, l.adjust);
+      if (res.canvas) {
+        l.canvas = res.canvas;
+        l.x -= res.offset * l.sx;
+        l.y -= res.offset * l.sy;
+        l.adjust = res.adjust;
+      }
+      notify();
+      say('Anpassungen sind jetzt Teil der Pixel');
+      break;
+    }
+
+    /* --- Filter --- */
+    case 'fx-sharpen': applyPixelOp(F.sharpen, 'Schärfen'); break;
+    case 'fx-edge': applyPixelOp(F.edges, 'Kanten betonen'); break;
+    case 'fx-emboss': applyPixelOp(F.emboss, 'Relief'); break;
+    case 'fx-vignette': applyPixelOp(c => F.vignette(c, 0.75), 'Vignette'); break;
+    case 'fx-autolevel': applyPixelOp(F.autoLevel, 'Auto-Tonwert'); break;
+    case 'fx-flip-h': applyPixelOp(c => F.flip(c, true), 'Horizontal spiegeln'); break;
+    case 'fx-flip-v': applyPixelOp(c => F.flip(c, false), 'Vertikal spiegeln'); break;
+    case 'fx-rot90': applyPixelOp(F.rotate90, '90° drehen'); break;
+    case 'fx-pixelate': {
+      const r = await modal('Verpixeln', [{ key: 'v', label: 'Blockgröße (px)', type: 'number', value: 12, min: 2, max: 200 }]);
+      if (r) applyPixelOp(c => F.pixelate(c, r.v), 'Verpixeln');
+      break;
+    }
+    case 'fx-noise': {
+      const r = await modal('Rauschen', [{ key: 'v', label: 'Stärke', type: 'number', value: 20, min: 1, max: 120 }]);
+      if (r) applyPixelOp(c => F.noise(c, r.v), 'Rauschen');
+      break;
+    }
+    case 'fx-posterize': {
+      const r = await modal('Tontrennung', [{ key: 'v', label: 'Stufen', type: 'number', value: 5, min: 2, max: 32 }]);
+      if (r) applyPixelOp(c => F.posterize(c, r.v), 'Tontrennung');
+      break;
+    }
+    case 'fx-threshold': {
+      const r = await modal('Schwellenwert', [{ key: 'v', label: 'Grenze (0–255)', type: 'number', value: 128, min: 0, max: 255 }]);
+      if (r) applyPixelOp(c => F.threshold(c, r.v), 'Schwellenwert');
+      break;
+    }
+
+    /* --- Seiten --- */
+    case 'page-add': {
+      const r = await modal('Leere Seite anhängen', [
+        { key: 'w', label: 'Breite (px)', type: 'number', value: p.width, min: 1, max: 20000 },
+        { key: 'h', label: 'Höhe (px)', type: 'number', value: p.height, min: 1, max: 20000 },
+      ], { okLabel: 'Anhängen' });
+      if (r) PDF.addBlankPage(r.w, r.h);
+      break;
+    }
+    case 'page-dup': PDF.duplicatePage(); break;
+    case 'page-del': PDF.deletePage(); break;
+    case 'page-rot': PDF.rotatePage(); break;
+
+    /* --- Ansicht --- */
+    case 'zoom-in': setZoom(state.zoom * 1.25); break;
+    case 'zoom-out': setZoom(state.zoom / 1.25); break;
+    case 'zoom-fit': fitZoom(); break;
+
+    /* --- Schrift --- */
+    case 'load-font': {
+      const f = await pickFile('.ttf,.otf,.woff,.woff2,font/*');
+      if (!f) break;
+      const name = await loadFontFile(f);
+      refreshFontSelect();
+      const cur = activeLayer();
+      if (cur?.type === 'text') { commit('Schriftart'); cur.text.family = `"${name}"`; refreshLayer(cur); }
+      notify();
+      say(`Schrift „${name}“ geladen – sie wird im Projekt mitgespeichert`);
+      break;
+    }
+
+    /* --- Hilfe --- */
+    case 'shortcuts': await info('Tastenkürzel', SHORTCUT_HTML); break;
+    case 'about': await info('Über Bildwerk', ABOUT_HTML); break;
+
+    default: console.warn('Unbekannter Befehl:', cmd);
+  }
+}
+
+const SHORTCUT_HTML = `
+<table>
+<tr><td>V / M / C</td><td>Verschieben · Auswahl · Zuschneiden</td></tr>
+<tr><td>B / E / G</td><td>Pinsel · Radierer · Farbeimer</td></tr>
+<tr><td>I / T / U</td><td>Pipette · Text · Rechteck</td></tr>
+<tr><td>Strg + Z / Y</td><td>Rückgängig / Wiederholen</td></tr>
+<tr><td>Strg + J</td><td>Ebene duplizieren</td></tr>
+<tr><td>Strg + D</td><td>Auswahl aufheben</td></tr>
+<tr><td>Entf</td><td>Auswahl leeren</td></tr>
+<tr><td>Eingabe</td><td>Zuschnitt bestätigen</td></tr>
+<tr><td>Strg + N / O / S</td><td>Neu · Öffnen · Projekt speichern</td></tr>
+<tr><td>Strg + E</td><td>Als PNG exportieren</td></tr>
+<tr><td>Strg + Mausrad</td><td>Zoomen</td></tr>
+<tr><td>+ / − / 0</td><td>Größer · Kleiner · Einpassen</td></tr>
+<tr><td>X</td><td>Vorder- und Hintergrundfarbe tauschen</td></tr>
+<tr><td>[ / ]</td><td>Pinsel kleiner / größer</td></tr>
+<tr><td>Bild ↑ / ↓</td><td>Seite wechseln</td></tr>
+</table>`;
+
+const ABOUT_HTML = `
+<p><b>Bildwerk</b> ist ein Bild- und PDF-Editor, der vollständig im Browser auf
+Ihrem Rechner läuft. Es gibt keinen Server, keinen Upload und kein Konto –
+geöffnete Dateien bleiben im Arbeitsspeicher des Browsers.</p>
+<p>Umfang: Ebenen mit Mischmodi und Deckkraft, Pinsel und Radierer, Auswahl und
+Zuschnitt, Formen, editierbare Textebenen mit eigenen Schriftdateien,
+nicht-destruktive Anpassungen, einrechnende Filter sowie mehrseitige
+PDF-Bearbeitung mit Export.</p>
+<p>Der Programmcode belegt wenige hundert Kilobyte; die beiden PDF-Bibliotheken
+kommen auf rund 3 MB.</p>`;
+
+/* ================= main.js ================= */
+/* Bildwerk – Start, Menüs, Tastatur, Drag & Drop. */
+
+
+
+
+
+/* ---------------- Menüs ---------------- */
+
+function initMenus() {
+  const closeAll = () => document.querySelectorAll('.menu.open').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const m = btn.parentElement;
+      const open = m.classList.contains('open');
+      closeAll();
+      if (!open) m.classList.add('open');
+    });
+    btn.parentElement.addEventListener('mouseenter', () => {
+      if (document.querySelector('.menu.open')) { closeAll(); btn.parentElement.classList.add('open'); }
+    });
+  });
+  document.addEventListener('click', closeAll);
+
+  /* Alle Schaltflächen mit data-cmd – Menü, Kopfleiste und Panels */
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-cmd]');
+    if (!btn) return;
+    closeAll();
+    try {
+      await run(btn.dataset.cmd);
+    } catch (err) {
+      console.error(err);
+      say('Fehler: ' + (err?.message || err));
+    }
+  });
+}
+
+/* ---------------- Tastatur ---------------- */
+
+const TOOL_KEYS = { v: 'move', m: 'select', c: 'crop', b: 'brush', e: 'eraser', g: 'bucket',
+  i: 'eyedrop', t: 'text', u: 'rect' };
+
+function initKeys() {
+  window.addEventListener('keydown', (ev) => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName);
+    if (!$('#modal').hidden) return;
+    const mod = ev.ctrlKey || ev.metaKey;
+
+    if (mod) {
+      const map = { z: 'undo', y: 'redo', j: 'copy-layer', d: 'select-none',
+        n: 'new', o: 'open-image', s: 'save-project', e: 'export-png' };
+      const cmd = ev.shiftKey && ev.key.toLowerCase() === 'z' ? 'redo' : map[ev.key.toLowerCase()];
+      if (cmd) { ev.preventDefault(); run(cmd); }
+      return;
+    }
+    if (typing) return;
+
+    const k = ev.key.toLowerCase();
+    if (TOOL_KEYS[k]) { setTool(TOOL_KEYS[k]); return; }
+
+    switch (ev.key) {
+      case 'Delete': case 'Backspace': ev.preventDefault(); run('clear-selection'); break;
+      case 'Enter': if (getCropRect()) run('crop-to-selection'); break;
+      case 'Escape': state.selection = null; clearCrop(); notify(); break;
+      case '+': case '=': run('zoom-in'); break;
+      case '-': run('zoom-out'); break;
+      case '0': fitZoom(); break;
+      case 'x': case 'X': run('swap-colors'); break;
+      case '[': opts.size = Math.max(1, Math.round(opts.size * 0.8)); setTool(state.tool); say('Pinsel: ' + opts.size + ' px'); break;
+      case ']': opts.size = Math.min(400, Math.round(opts.size * 1.25) + 1); setTool(state.tool); say('Pinsel: ' + opts.size + ' px'); break;
+      case 'PageDown': if (state.active < state.pages.length - 1) { state.active++; notify(); } break;
+      case 'PageUp': if (state.active > 0) { state.active--; notify(); } break;
+      case 'ArrowLeft': case 'ArrowRight': case 'ArrowUp': case 'ArrowDown': {
+        const l = activeLayer();
+        if (!l) break;
+        ev.preventDefault();
+        const d = ev.shiftKey ? 10 : 1;
+        commit('Verschieben');
+        if (ev.key === 'ArrowLeft') l.x -= d;
+        if (ev.key === 'ArrowRight') l.x += d;
+        if (ev.key === 'ArrowUp') l.y -= d;
+        if (ev.key === 'ArrowDown') l.y += d;
+        notify();
+        break;
+      }
+    }
+  });
+}
+
+/* ---------------- Dateien hineinziehen ---------------- */
+
+function initDrop() {
+  const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(t => document.addEventListener(t, stop));
+  document.addEventListener('drop', async (ev) => {
+    for (const f of [...(ev.dataTransfer?.files || [])]) {
+      try { await handleDroppedFile(f); }
+      catch (err) { console.error(err); say('Fehler: ' + err.message); }
+    }
+  });
+}
+
+/* ---------------- Start ---------------- */
+
+function initLibState() {
+  const node = $('#status-lib');
+  node.textContent = 'PDF-Bibliotheken werden geladen …';
+  (window.bildwerkLibs || Promise.resolve({})).then(libs => {
+    const ok = Object.values(libs).filter(l => l.ok);
+    if (ok.length === 2) {
+      node.className = 'lib-state ok';
+      node.textContent = ok.every(l => l.local) ? 'PDF: offline bereit' : 'PDF: bereit';
+    } else {
+      node.className = 'lib-state warn';
+      node.textContent = 'PDF-Funktionen nicht verfügbar (siehe vendor/README.md)';
+    }
+  });
+}
+
+let booted = false;
+function boot() {
+  if (booted) return;
+  booted = true;
+  initUI();
+  initMenus();
+  initKeys();
+  initDrop();
+  initLibState();
+  newDocument(1600, 1000, false);
+  state.name = 'Unbenannt';
+  say('Bereit – alles läuft lokal auf diesem Rechner');
+  window.addEventListener('resize', () => scheduleRender());
+  window.addEventListener('beforeunload', (e) => {
+    if (state.dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+  /* Kleine Schnittstelle für die Browser-Konsole und automatische Tests */
+  window.bildwerk = { state, page, run, importPdf, exportPdf, notify, fitZoom };
+}
+
+document.addEventListener('DOMContentLoaded', boot);
+if (document.readyState !== 'loading') boot();
+
+</script>
+</body>
+</html>
