@@ -1,3 +1,6 @@
 # Fremdbibliotheken werden mit vendor/get-libs.sh geholt
 vendor/*.js
 !vendor/get-libs.sh
+
+# enthaelt den Bibliothekscode mit; mit tools/build-standalone.py --embed bauen
+bildwerk-komplett.html

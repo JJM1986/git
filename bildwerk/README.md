@@ -13,8 +13,21 @@ PDF-Bibliotheken sind es etwa **2 MB**.
 
 **Weg 1 – Doppelklick (am einfachsten)**
 
-`bildwerk-standalone.html` im Browser öffnen. Das ist eine einzige Datei,
-die alles enthält.
+`bildwerk-komplett.html` im Browser öffnen. Diese eine Datei (2 MB) enthält
+wirklich alles, auch die beiden PDF-Bibliotheken: kein Ordner daneben, kein
+Server, keine Internetverbindung. Kopieren Sie sie hin, wo Sie wollen.
+
+Sie ist nicht eingecheckt, weil sie fremden Bibliothekscode mitbringt.
+Einmal erzeugen:
+
+```sh
+sh vendor/get-libs.sh                            # holt pdf.js und pdf-lib
+python3 tools/build-standalone.py --embed        # baut bildwerk-komplett.html
+```
+
+Die mitgelieferte `bildwerk-standalone.html` (107 KB) ist dieselbe Anwendung
+ohne eingebettete PDF-Bibliotheken; sie sucht diese in `vendor/` daneben oder
+holt sie beim ersten Start von einem CDN.
 
 **Weg 2 – mit kleinem lokalem Webserver**
 
@@ -31,11 +44,11 @@ aus `js/` und eignet sich, wenn Sie am Programm selbst etwas ändern wollen.
 sh vendor/get-libs.sh
 ```
 
-Damit liegen pdf.js und pdf-lib lokal vor und Bildwerk arbeitet dauerhaft
-offline. Ohne diesen Schritt versucht das Programm, die beiden Bibliotheken
-von einem CDN zu laden; klappt auch das nicht, bleibt der Bildeditor voll
-benutzbar und nur die PDF-Funktionen sind abgeschaltet. Die Statusleiste
-unten rechts zeigt den Zustand an.
+Nötig für Weg 2 und für den Bau von `bildwerk-komplett.html`. Ohne diesen
+Schritt versucht das Programm, die beiden Bibliotheken von einem CDN zu
+laden; klappt auch das nicht, bleibt der Bildeditor voll benutzbar und nur
+die PDF-Funktionen sind abgeschaltet. Die Statusleiste unten rechts zeigt
+den Zustand an.
 
 ## Was das Programm kann
 
@@ -119,13 +132,14 @@ RAM, und die Historie hält bis zu 40 Schritte vor.
 | `js/ui.js` | Oberfläche, Panels, Dialoge |
 | `js/commands.js` | Menübefehle, Dateiein- und -ausgabe |
 | `js/main.js` | Start, Menüs, Tastatur, Drag & Drop |
-| `tools/build-standalone.py` | erzeugt `bildwerk-standalone.html` neu |
+| `tools/build-standalone.py` | erzeugt die Einzeldateien neu (`--embed` für die komplette) |
 | `tools/selftest.mjs` | Selbsttest im echten Browser |
 
 Nach Änderungen in `js/` oder `css/` die Einzeldatei neu bauen:
 
 ```sh
-python3 tools/build-standalone.py
+python3 tools/build-standalone.py            # bildwerk-standalone.html
+python3 tools/build-standalone.py --embed    # bildwerk-komplett.html
 ```
 
 Der Selbsttest fährt einen echten Browser hoch und prüft Pinsel, Historie,
