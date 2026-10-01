@@ -1,0 +1,418 @@
+<title>Basisbogen Ausfüllassistent</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#EEF1F4; --surface:#FFFFFF; --surface-2:#F6F8FA; --line:#D5DBE1; --ink:#1A222C; --muted:#5A6672;
+  --accent:#0F6C72; --accent-ink:#FFFFFF; --accent-soft:#DDEFF0;
+  --ok:#2A7A4B; --ok-soft:#E1F2E7; --warn:#9A5B00; --warn-soft:#FBEBD0; --open:#5F6B78; --open-soft:#E6EAEE;
+  --code:#F3F5F7; --shadow:0 1px 2px rgba(20,30,40,.06);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0F1418; --surface:#171E25; --surface-2:#1E262E; --line:#2C3640; --ink:#E7ECF0; --muted:#9AA7B3;
+  --accent:#57B8BD; --accent-ink:#0B1416; --accent-soft:#143538;
+  --ok:#6CC894; --ok-soft:#173A27; --warn:#F0B35C; --warn-soft:#3E2C0E; --open:#A9B4BF; --open-soft:#28313A;
+  --code:#111820; --shadow:none;
+}}
+:root[data-theme="dark"]{
+  --ground:#0F1418; --surface:#171E25; --surface-2:#1E262E; --line:#2C3640; --ink:#E7ECF0; --muted:#9AA7B3;
+  --accent:#57B8BD; --accent-ink:#0B1416; --accent-soft:#143538;
+  --ok:#6CC894; --ok-soft:#173A27; --warn:#F0B35C; --warn-soft:#3E2C0E; --open:#A9B4BF; --open-soft:#28313A;
+  --code:#111820; --shadow:none;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.55;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:1040px;margin:0 auto}
+header.top{padding-block:36px 20px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 10px}
+h1{font-family:"Source Serif 4",Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(28px,4vw,40px);line-height:1.12;margin:0 0 12px;text-wrap:balance}
+.lede{max-width:64ch;color:var(--muted);margin:0;font-size:16px}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);background:var(--ground);z-index:5;display:flex;gap:6px;flex-wrap:wrap;padding-block:12px;border-bottom:1px solid var(--line);margin-bottom:28px}
+nav.tabs a{text-decoration:none;color:var(--ink);font-weight:500;font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+nav.tabs a:hover,nav.tabs a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{margin-bottom:44px;scroll-margin-top:72px}
+h2{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:24px;margin:0 0 6px;text-wrap:balance}
+h3{font-size:15px;font-weight:600;margin:22px 0 8px;letter-spacing:.01em}
+.sub{color:var(--muted);margin:0 0 18px;max-width:70ch}
+p{max-width:70ch}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow)}
+.panel h3{margin-top:0}
+ol.steps{margin:0;padding-left:0;list-style:none;counter-reset:s;display:grid;gap:10px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+ol.steps li::before{content:counter(s);font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:13px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+ol.steps li strong{display:block;font-weight:600}
+.causes{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cause{border-left:3px solid var(--warn);padding:2px 0 2px 14px}
+.cause strong{display:block;font-weight:600}
+.cause span{color:var(--muted);font-size:14px}
+.chip{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:500;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.open{background:var(--open-soft);color:var(--open)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 14px;font-size:14px;color:var(--muted)}
+.promptbox{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.promptbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.promptbar .meta{font-size:13px;color:var(--muted)}
+button.copy{font:inherit;font-weight:600;font-size:14px;color:var(--accent-ink);background:var(--accent);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+button.copy:hover{filter:brightness(1.05)} button.copy:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+button.copy.done{background:var(--ok)}
+pre{margin:0;font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.5;background:var(--code);color:var(--ink);padding:16px 18px;overflow:auto;max-height:70vh;white-space:pre-wrap;overflow-wrap:anywhere}
+pre.soll{max-height:none}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td q{quotes:"„" "“"} td q::before{content:open-quote} td q::after{content:close-quote}
+td.f{font-weight:600;white-space:nowrap}
+.stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:18px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat b{display:block;font-family:"Source Serif 4",Georgia,serif;font-size:30px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.stat span{font-size:13px;color:var(--muted)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-top:14px}
+summary{cursor:pointer;padding:12px 16px;font-weight:600}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+details pre{border-top:1px solid var(--line)}
+.note{background:var(--accent-soft);border-radius:10px;padding:12px 16px;color:var(--ink);font-size:14px;max-width:none}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:no-preference){button.copy{transition:background .2s}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">BEI_BW 2024 · Bogen A · Prompt 1 von 3</p>
+  <h1>Basisbogen Ausfüllassistent</h1>
+  <p class="lede">Ein Prompt für Nele, der aus Gesprächsprotokoll und Erhebungsbogen C eine Ausfüllliste für den Basisbogen erzeugt: Feld für Feld, wortwörtlich belegt, mit klarer Kennzeichnung, was aus der Akte kommen muss.</p>
+</header>
+
+<nav class="tabs" aria-label="Abschnitte">
+  <a href="#ablauf">Ablauf</a>
+  <a href="#prompt">Prompt kopieren</a>
+  <a href="#signale">Schlüsselwörter</a>
+  <a href="#test">Testlauf Beispiel 1</a>
+</nav>
+
+<section id="ablauf">
+  <h2>Warum eine Ausfüllliste statt eines ausgefüllten Bogens</h2>
+  <p class="sub">Die bisherigen Versuche scheiterten an zwei Stellen. Beide liegen in der Aufgabenstellung, nicht im Modell.</p>
+  <div class="causes">
+    <div class="cause"><strong>Formatierung</strong><span>Die KI baut die Word-Vorlage als Markdown nach. Die 46 Kästchen des Basisbogens sind aber Word-Inhaltssteuerelemente, die man nur anklicken kann. Ein nachgebauter Bogen ist nie übertragbar. Außerdem wird <code>---</code> im Chat zur Trennlinie.</span></div>
+    <div class="cause"><strong>Zuordnung</strong><span>Ohne Felddefinition ordnet die KI nach Ähnlichkeit zu: „meine 3 Kinder“ der Pflegemutter landen bei Anzahl der Kinder, der Bandscheibenvorfall wird zur körperlichen Behinderung, die Werkstattbetreuerin zur rechtlichen Betreuerin.</span></div>
+    <div class="cause"><strong>Lücken</strong><span>Familienstand „ledig“ und Staatsangehörigkeit „deutsch“ werden geraten, obwohl das Protokoll nichts dazu sagt.</span></div>
+    <div class="cause"><strong>Sprecher</strong><span>Ohne Kürzel-Legende weiß die KI nicht, wer FS, FF, FD und SD sind, und schreibt Aussagen der Begleitpersonen der Person zu.</span></div>
+  </div>
+
+  <h3>Der Lösungsweg</h3>
+  <p>Ein Bogen, ein Prompt. Jeder Prompt liefert eine Liste mit genau einer Zeile pro Feld der Vorlage, in der Reihenfolge der Vorlage: Eintrag, Status, Beleg. Die Liste wird von oben nach unten in Word übertragen. Inhalt und Layout sind getrennt.</p>
+  <div class="legend">Status je Feld: <span class="chip ok">BELEGT</span> steht wörtlich in einer Quelle <span class="chip warn">ABGELEITET</span> Schlussfolgerung, bitte prüfen <span class="chip open">OFFEN</span> aus der Akte ergänzen</div>
+
+  <h3>So wird der Prompt benutzt</h3>
+  <ol class="steps">
+    <li><div><strong>Prompt kopieren</strong>Unten auf „Prompt kopieren“ klicken und in Nele einfügen.</div></li>
+    <li><div><strong>Legende ausfüllen</strong>Oben im Prompt eintragen, wer im Gespräch FS, FF, FD und SD war und wie die leistungsberechtigte Person heißt.</div></li>
+    <li><div><strong>Quelle 1 einfügen</strong>Text des Gesprächsprotokolls zwischen <code>=== QUELLE 1 ===</code> und <code>=== ENDE QUELLE 1 ===</code> einsetzen.</div></li>
+    <li><div><strong>Quelle 2 einfügen</strong>Text des Erhebungsbogens C zwischen <code>=== QUELLE 2 ===</code> und <code>=== ENDE QUELLE 2 ===</code> einsetzen.</div></li>
+    <li><div><strong>Abschicken und übertragen</strong>Die Antwort ist ein Codeblock. Zeile für Zeile in die Word-Vorlage übertragen: Text kopieren, Kästchen anklicken.</div></li>
+    <li><div><strong>Prüfen</strong>Alle Zeilen mit ABGELEITET fachlich prüfen, alle mit OFFEN aus der Akte ergänzen.</div></li>
+  </ol>
+</section>
+
+<section id="prompt">
+  <h2>Der Prompt für den Basisbogen</h2>
+  <p class="sub">Vollständiger Text. Enthält Rolle, Quellenregeln, den Feldkatalog mit Signalwörtern und Fallen, das feste Ausgabeformat und eine Selbstprüfung. Platzhalter in eckigen Klammern werden pro Fall ausgefüllt.</p>
+  <div class="promptbox">
+    <div class="promptbar">
+      <span class="meta">Version 1 · getestet an Beispiel 1 · ca. 1.600 Wörter</span>
+      <button class="copy" id="copyBtn" type="button" data-target="promptText">Prompt kopieren</button>
+    </div>
+    <pre id="promptText">Du bist Assistenz für die Bedarfsermittlung nach BEI_BW (Baden-Württemberg, Stand 2024) beim Sozialen Dienst eines Landratsamts. Deine Aufgabe: Aus den unten eingefügten Quellen erstellst du eine AUSFÜLLLISTE für den Bogen „A – Basisbogen“. Du füllst den Bogen nicht selbst aus und baust ihn nicht nach. Du lieferst pro Feld nur den Eintrag, den die Fachkraft anschließend in die Word-Vorlage überträgt.
+
+QUELLEN
+Quelle 1 = Gesprächsprotokoll (Rohnotizen aus dem Gespräch zur Bedarfsermittlung).
+Quelle 2 = Erhebungsbogen C (bereits ausgefüllt; enthält Ergänzungen aus dem Gespräch und Hinweise aus dem Teilhabebericht).
+
+Sprecherkürzel im Protokoll (Legende, von der Fachkraft ausgefüllt):
+- ohne Kürzel / Ich-Form = leistungsberechtigte Person: [NAME EINTRAGEN]
+- FS = [FUNKTION EINTRAGEN, z. B. Pflegemutter / Gastfamilie]
+- FF = [FUNKTION EINTRAGEN]
+- FD = [FUNKTION EINTRAGEN, z. B. Fachdienst der Werkstatt]
+- SD = [FUNKTION EINTRAGEN, z. B. Sozialer Dienst Landratsamt, bedarfsermittelnde Fachkraft, Name]
+Fehlt eine Angabe in der Legende, schreibst du „Funktion nicht angegeben“. Du erfindest keine Funktion und keinen Namen.
+
+GRUNDREGELN (gelten für jedes Feld)
+1. Nur Quellen. Alles, was nicht in Quelle 1 oder Quelle 2 steht, ist OFFEN. Du ergänzt nichts aus Allgemeinwissen, du rätst nicht und du füllst keine Lücke „plausibel“.
+2. Wortwörtlich. Belege übernimmst du buchstabengetreu, mit Sprecherkürzel, Rechtschreibung und Zeichensetzung des Originals, auch bei Tippfehlern. Keine Umformulierung, keine Zusammenfassung, keine Korrektur.
+3. Drei Status pro Feld:
+   BELEGT = steht wörtlich so in einer Quelle.
+   ABGELEITET = ergibt sich nur durch Schlussfolgerung (Beispiel: Geschlecht aus „Frau“). Immer mit Beleg und dem Zusatz „bitte prüfen“.
+   OFFEN = aus den Quellen nicht ermittelbar; wird von der Fachkraft aus der Akte ergänzt.
+4. Kästchen: [X] nur bei BELEGT oder ABGELEITET. Bei OFFEN bleiben alle Kästchen der Gruppe [ ].
+5. Aussagen anderer Sprecher über sich selbst gehören nicht zur Person. Beispiel: „meine 3 Kinder“ von FS sind Kinder von FS, nicht der leistungsberechtigten Person.
+6. Gesundheitliche Angaben (Diagnosen, Schmerzen, OP, Reha, Medikamente, Gewicht) gehören in den Gesundheitsbogen B, nicht in den Basisbogen. Aus ihnen leitest du weder Grad der Behinderung noch Pflegegrad noch die Art der wesentlichen Behinderung ab.
+7. Ausgabe exakt im vorgegebenen Format: gleiche Reihenfolge, gleiche Feldnamen, kein Feld weglassen, kein Feld hinzufügen, keine Tabellen, keine eigenen Überschriften, kein Text vor oder nach dem Codeblock.
+
+FELDKATALOG mit Signalwörtern (wonach du in den Quellen suchst) und Fallen
+1 Angaben zur Person
+1.1 Stammdaten
+- Name, Vorname → Text. Signal: vollständiger Name der Person, „Frau …“/„Herr …“. Nur Vorname bekannt: Vorname eintragen, Nachname OFFEN.
+- Geburtsdatum → Text. Signal: Datum, „geboren“. Ein Alter in Jahren ist kein Geburtsdatum → OFFEN mit Hinweis.
+- Geschlecht → Kästchen weiblich / männlich / divers. Signal: „Frau/Herr“, „sie/er“. Status immer ABGELEITET.
+- Familienstand → Kästchen ledig / verheiratet / verwitwet / geschieden. Signal: „Ehefrau/Ehemann“, „verheiratet“, „geschieden“, „verwitwet“, „Partner/in“. Ohne Signal: OFFEN. Falle: „ledig“ nicht vermuten, nur weil niemand erwähnt wird.
+- Anzahl der Kinder / davon im eigenen Haushalt → Zahl. Signal: „mein Sohn“, „meine Tochter“, „meine Kinder“ in der Ich-Form der Person. Falle: Kinder anderer Sprecher zählen nicht.
+- Staatsangehörigkeit → Kästchen deutsch / andere, und zwar. Signal: „Staatsangehörigkeit“, „Pass“, „Aufenthaltstitel“. Ohne Signal: OFFEN. Falle: „deutsch“ nicht vermuten.
+1.2 Kontaktdaten
+- Straße und Hausnr. / Postleitzahl und Ort / Telefon / E-Mail → Text. Signal: konkrete Adresse, Nummer, Mailadresse. Falle: Beschreibungen der Wohnlage („wohnen sehr außerhalb“, „5 km bis zur Bushaltestelle“) sind keine Adresse → OFFEN.
+- Ergänzende Hinweise → „---“, wenn nichts vorliegt.
+1.3 Rechtliche Vertretung
+- Erwachsene: keine / Vollmacht / rechtliche Betreuung / sonstige. Kinder und Jugendliche: beide Eltern / nur Mutter / nur Vater. Signal: „Betreuer/in“, „gesetzliche Betreuung“, „rechtliche Betreuung“, „Betreuungsverein“, „Vollmacht“, „bevollmächtigt“, „Amtsgericht“, „Beschluss“. Falle: „Betreuerin“ kann auch Betreuung im Wohnen oder in der Werkstatt meinen → höchstens ABGELEITET, bitte prüfen. Ist die Person erwachsen, bleibt die Spalte Kinder und Jugendliche [ ].
+- Aufgabenbereiche der rechtlichen Betreuung (6 Kästchen) → nur aus Betreuerausweis oder Beschluss. Aus dem Gespräch praktisch nie belegbar → OFFEN.
+- Ergänzende Hinweise → Namen der Betreuungsperson wörtlich, wenn genannt.
+1.4 Personen des Vertrauens
+- Name, Vorname / Kontaktdaten → Text. Signal: „Vertrauensperson“, „Bezugsperson“, „meine Ansprechpartnerin“, eine Person, die die leistungsberechtigte Person selbst benennt. Falle: Begleitpersonen im Gespräch sind nicht automatisch Vertrauenspersonen → OFFEN, im Hinweis nennen, wer in Frage kommt.
+2 Gespräche zur Bedarfsermittlung
+2.1 Datum, Ort und Beteiligte
+- Datum, Ort → Text. Signal: Datumsangabe im Protokoll; Ort aus „hier“, „hierher“, Einrichtungsnamen. Ort meist ABGELEITET.
+- Teilnehmende Personen mit Funktion und Kürzel → Text. Ein Eintrag je Kürzel aus der Legende plus die Person selbst. Format je Eintrag: „Kürzel – Name (falls genannt) – Funktion“.
+2.2 Kommunikationshilfen
+- nicht erforderlich / erforderlich, und zwar. Signal für erforderlich: „Dolmetscher/in“, „Gebärdensprache“, „Leichte Sprache“, „Talker“, „Unterstützte Kommunikation“, „Schriftdolmetscher“, „versteht nicht“. Antwortet die Person im Protokoll selbst in ganzen Sätzen und fehlt jedes Signal → „nicht erforderlich“ als ABGELEITET.
+3 Dokumentation der Bedarfsermittlung
+3.1 Erst- oder Folgeermittlung
+- Erstermittlung / Folgeermittlung. Signal für Folgeermittlung: „letzter Teilhabebericht“, „letzter Gesamtplan“, „letzter GP“, „letzte Bedarfsermittlung“, „Siehe Vorbereitungsbogen“, „Zielüberprüfung“. Signal für Erstermittlung: „Erstantrag“, „erstmalig“, „bisher keine Leistung“.
+- Datum der letzten / vorliegenden Bedarfsermittlung, abgeschlossen am → Text. Fast immer OFFEN.
+3.2 Bedarfsermittelnde Fachkraft → Name, Stelle, Kontaktdaten aus der Legende (SD), sonst OFFEN.
+3.3 Versand der ausgefüllten Bögen
+- ja / nein. Signal: „zugeschickt“, „Kopie“, „per Post“, „möchte die Bögen haben“. Ohne Signal: „nein“ als ABGELEITET und in Ergänzende Hinweise wörtlich: Der Wunsch zum Erhalt des BEI BW wurde im Gespräch nicht geäußert.
+4 Behinderung und Pflegegrad
+4.1 Schwerbehinderung → ja mit GdB / Merkzeichen / beantragt / nein. Signal: „GdB“, „Grad der Behinderung“, „Schwerbehindertenausweis“, „Merkzeichen“, „G“, „B“, „H“, „aG“, „RF“, „Versorgungsamt“, „beantragt“. Ohne Signal: OFFEN. Falle: Eine Krankheit ist kein GdB.
+4.2 Wesentliche Behinderung → liegt vor / droht / noch nicht festgestellt; körperliche / seelische / geistige / Sinnesbeeinträchtigungen. Nur bei ausdrücklicher Angabe („wesentliche Behinderung“, „festgestellt“, Diagnose mit Zuordnung) belegbar. Falle: Krankheiten aus dem Gespräch, etwa ein Rückenleiden, begründen kein Kreuz bei „körperliche“. Ohne ausdrückliche Angabe: alle Kästchen [ ] und OFFEN.
+4.3 Pflegegrad → ja mit Pflegegrad 1 bis 5 / beantragt / nein. Signal: „Pflegegrad“, „Pflegekasse“, „Pflegegeld“, „Medizinischer Dienst“, „MDK“. Ohne Signal: OFFEN.
+5 Ergänzende Hinweise (gesamt) → nur, was in keinen anderen Bogen gehört. Sonst „---“.
+
+AUSGABEFORMAT
+Gib die gesamte Antwort als einen einzigen Codeblock aus (drei Backticks, dann text). Fülle die Platzhalter „…“. Lasse keine Zeile weg.
+
+```text
+BEI_BW A – BASISBOGEN – AUSFÜLLLISTE
+Legende: [X] = ankreuzen · [ ] = leer lassen · TEXT: = eintragen · OFFEN = aus der Akte ergänzen
+Status je Feld: BELEGT / ABGELEITET (bitte prüfen) / OFFEN
+
+1 ANGABEN ZUR PERSON
+1.1 Stammdaten
+Name, Vorname: TEXT: … | Status: … | Beleg: „…“ (Quelle, Sprecher)
+Geburtsdatum: TEXT: … | Status: … | Beleg: …
+Geschlecht: [ ] weiblich [ ] männlich [ ] divers | Status: … | Beleg: …
+Familienstand: [ ] ledig [ ] verheiratet [ ] verwitwet [ ] geschieden | Status: … | Beleg: …
+Anzahl der Kinder: TEXT: … | davon im eigenen Haushalt: TEXT: … | Status: … | Beleg: …
+Staatsangehörigkeit: [ ] deutsch [ ] andere, und zwar: TEXT: … | Status: … | Beleg: …
+1.2 Kontaktdaten
+Straße und Hausnr.: TEXT: … | Status: …
+Postleitzahl und Ort: TEXT: … | Status: …
+Telefon: TEXT: … | Status: …
+E-Mail: TEXT: … | Status: …
+Ergänzende Hinweise: TEXT: …
+1.3 Rechtliche Vertretung
+Erwachsene: [ ] keine [ ] Vollmacht [ ] rechtliche Betreuung [ ] sonstige | Status: … | Beleg: …
+Kinder und Jugendliche: [ ] beide Eltern [ ] nur Mutter [ ] nur Vater | Status: …
+Aufgabenbereiche: [ ] Vermögenssorge [ ] Gesundheitsfürsorge [ ] Aufenthaltsbestimmung [ ] Vertretung gegenüber Behörden, Versicherungen, Renten- und Sozialleistungsträgern [ ] Wohnungsangelegenheiten [ ] Entgegennahme, Öffnen und Anhalten der Post | Status: …
+Ergänzende Hinweise: TEXT: …
+1.4 Personen des Vertrauens
+Name, Vorname: TEXT: … | Status: … | Beleg: …
+Kontaktdaten: TEXT: … | Status: …
+Ergänzende Hinweise: TEXT: …
+
+2 GESPRÄCHE ZUR BEDARFSERMITTLUNG
+2.1 Datum, Ort und Beteiligte
+Datum, Ort: TEXT: … | Status: … | Beleg: …
+Teilnehmende Personen mit Funktion und Kürzel: TEXT: … | Status: … | Beleg: …
+Ergänzende Hinweise: TEXT: …
+2.2 Kommunikationshilfen
+[ ] nicht erforderlich [ ] erforderlich, und zwar: TEXT: … | Status: … | Beleg: …
+
+3 DOKUMENTATION DER BEDARFSERMITTLUNG
+3.1 Erst- oder Folgeermittlung
+[ ] Erstermittlung [ ] Folgeermittlung | Status: … | Beleg: …
+Datum der letzten Bedarfsermittlung: TEXT: … | abgeschlossen am: TEXT: … | Status: …
+Datum der vorliegenden Bedarfsermittlung: TEXT: … | abgeschlossen am: TEXT: … | Status: …
+3.2 Bedarfsermittelnde Fachkraft
+Name, Vorname: TEXT: … | Stelle: TEXT: … | Kontaktdaten: TEXT: … | Status: …
+3.3 Versand der ausgefüllten Bögen
+[ ] ja [ ] nein | Status: … | Beleg: …
+Ergänzende Hinweise: TEXT: …
+
+4 BEHINDERUNG UND PFLEGEGRAD
+4.1 Schwerbehinderung
+[ ] ja, GdB: TEXT: … | Merkzeichen: TEXT: … | [ ] beantragt | [ ] nein | Status: … | Beleg: …
+Ergänzende Hinweise: TEXT: …
+4.2 Wesentliche Behinderung
+[ ] liegt vor [ ] droht [ ] noch nicht festgestellt | Status: … | Beleg: …
+[ ] körperliche [ ] seelische [ ] geistige [ ] Sinnesbeeinträchtigungen | Status: … | Beleg: …
+Ergänzende Hinweise: TEXT: …
+4.3 Pflegegrad
+[ ] ja, Pflegegrad: [ ] 1 [ ] 2 [ ] 3 [ ] 4 [ ] 5 | [ ] beantragt | [ ] nein | Status: … | Beleg: …
+Ergänzende Hinweise: TEXT: …
+
+5 ERGÄNZENDE HINWEISE (GESAMT)
+TEXT: …
+
+NICHT ZUGEORDNET
+(Protokollstellen mit Bezug zum Basisbogen, die keinem Feld sicher zuzuordnen sind. Wörtlich, mit Kürzel. Sonst: keine.)
+- …
+
+SELBSTPRÜFUNG
+1 Alle 5 Abschnitte und alle Felder in der Reihenfolge der Vorlage ausgegeben? ja/nein
+2 Jedes [X] hat einen Beleg aus Quelle 1 oder Quelle 2? ja/nein
+3 Kein Feld aus Allgemeinwissen oder Vermutung gefüllt? ja/nein
+4 Kinder oder Angehörige anderer Sprecher nicht der Person zugerechnet? ja/nein
+5 In Abschnitt 4 nichts angekreuzt, was nicht ausdrücklich GdB, Pflegegrad oder wesentliche Behinderung nennt? ja/nein
+6 Alle Belege buchstabengetreu mit Sprecherkürzel? ja/nein
+```
+
+=== QUELLE 1: GESPRÄCHSPROTOKOLL ===
+[HIER DEN TEXT DES GESPRÄCHSPROTOKOLLS EINFÜGEN]
+=== ENDE QUELLE 1 ===
+
+=== QUELLE 2: ERHEBUNGSBOGEN C ===
+[HIER DEN TEXT DES ERHEBUNGSBOGENS EINFÜGEN]
+=== ENDE QUELLE 2 ===
+</pre>
+  </div>
+</section>
+
+<section id="signale">
+  <h2>Schlüsselwörter: Was aus dem Protokoll in den Basisbogen gehört</h2>
+  <p class="sub">Der Basisbogen ist ein Verwaltungsbogen. Aus dem Gespräch kommen nur wenige Felder. Die Tabelle zeigt pro Feld, wonach die KI sucht, was sie in Beispiel 1 findet und welche Falle sie vermeiden muss.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Feld</th><th>Signalwörter</th><th>Fund in Beispiel 1</th><th>Status</th><th>Falle</th></tr></thead>
+    <tbody>
+      <tr><td class="f">Name, Vorname</td><td>vollständiger Name, „Frau/Herr“</td><td><q>Frau Anna Apfelkuchen</q> (Erhebungsbogen)</td><td><span class="chip ok">BELEGT</span></td><td>nur Vorname, Spitzname</td></tr>
+      <tr><td class="f">Geschlecht</td><td>„Frau/Herr“, „sie/er“</td><td><q>Sie hatte einen dreifachen Bandscheibenvorfall</q> (FS)</td><td><span class="chip warn">ABGELEITET</span></td><td>–</td></tr>
+      <tr><td class="f">Familienstand</td><td>Ehefrau/-mann, verheiratet, geschieden, verwitwet, Partner</td><td>kein Fund</td><td><span class="chip open">OFFEN</span></td><td>„ledig“ nicht vermuten</td></tr>
+      <tr><td class="f">Anzahl der Kinder</td><td>„mein Sohn / meine Tochter / meine Kinder“ in Ich-Form der Person</td><td>kein Fund</td><td><span class="chip open">OFFEN</span></td><td><q>sie spielt gerne mit meinen 3 Kindern</q> sagt FS, nicht die Person</td></tr>
+      <tr><td class="f">Staatsangehörigkeit</td><td>Staatsangehörigkeit, Pass, Aufenthaltstitel</td><td>kein Fund</td><td><span class="chip open">OFFEN</span></td><td>„deutsch“ nicht vermuten</td></tr>
+      <tr><td class="f">Kontaktdaten</td><td>Straße, PLZ, Telefonnummer, Mailadresse</td><td>kein Fund</td><td><span class="chip open">OFFEN</span></td><td><q>Wir wohnen sehr außerhalb</q> ist keine Adresse</td></tr>
+      <tr><td class="f">Rechtliche Vertretung</td><td>Betreuer/in, gesetzliche Betreuung, Vollmacht, Beschluss, Amtsgericht</td><td><q>Es gab jetzt ein Betreuerinnenwechsel. Zu Frau Koch … mit Frau Holzmann</q> (FS)</td><td><span class="chip warn">ABGELEITET</span></td><td>„Betreuerin“ kann Wohn- oder Werkstattbetreuung meinen</td></tr>
+      <tr><td class="f">Aufgabenbereiche</td><td>Vermögenssorge, Gesundheitsfürsorge, Aufenthalt, Behörden, Wohnung, Post</td><td>kein Fund</td><td><span class="chip open">OFFEN</span></td><td>nur aus Betreuerausweis oder Beschluss</td></tr>
+      <tr><td class="f">Personen des Vertrauens</td><td>Vertrauensperson, Bezugsperson, von der Person selbst benannt</td><td>kein Fund, Hinweis auf FS</td><td><span class="chip open">OFFEN</span></td><td>Begleitperson ist nicht automatisch Vertrauensperson</td></tr>
+      <tr><td class="f">Datum, Ort</td><td>Datum im Protokollkopf; „hier“, „hierher“, Einrichtungsname</td><td><q>Danach bin ich hierhergekommen (Liebenau).</q></td><td><span class="chip warn">ABGELEITET</span> Ort, <span class="chip open">OFFEN</span> Datum</td><td>–</td></tr>
+      <tr><td class="f">Teilnehmende Personen</td><td>alle Sprecherkürzel plus die Person</td><td>FS, FF, FD, SD, Ich-Form</td><td><span class="chip ok">BELEGT</span></td><td>Funktionen nur aus der Legende</td></tr>
+      <tr><td class="f">Kommunikationshilfen</td><td>Dolmetscher, Gebärden, Leichte Sprache, Talker, Schriftdolmetscher</td><td>kein Signal, Person antwortet selbst</td><td><span class="chip warn">ABGELEITET</span> nicht erforderlich</td><td>–</td></tr>
+      <tr><td class="f">Erst-/Folgeermittlung</td><td>letzter Teilhabebericht, letzter GP, Zielüberprüfung, „Siehe Vorbereitungsbogen“</td><td><q>Aus dem Teilhabebericht vom 13.02.26</q> (Erhebungsbogen)</td><td><span class="chip warn">ABGELEITET</span> Folgeermittlung</td><td>–</td></tr>
+      <tr><td class="f">Versand der Bögen</td><td>zugeschickt, Kopie, per Post, „möchte die Bögen haben“</td><td>kein Fund</td><td><span class="chip warn">ABGELEITET</span> nein + Standardsatz</td><td>–</td></tr>
+      <tr><td class="f">Schwerbehinderung</td><td>GdB, Grad der Behinderung, Ausweis, Merkzeichen, Versorgungsamt</td><td>kein Fund</td><td><span class="chip open">OFFEN</span></td><td>Krankheit ist kein GdB</td></tr>
+      <tr><td class="f">Wesentliche Behinderung</td><td>„wesentliche Behinderung“, „festgestellt“, Diagnose mit Zuordnung</td><td>kein Fund</td><td><span class="chip open">OFFEN</span></td><td>Bandscheibenvorfall führt nicht zu „körperliche“. Referenz: nur „geistige“ (F70.0 aus Bogen B)</td></tr>
+      <tr><td class="f">Pflegegrad</td><td>Pflegegrad, Pflegekasse, Pflegegeld, Medizinischer Dienst</td><td>kein Fund</td><td><span class="chip open">OFFEN</span></td><td>–</td></tr>
+      <tr><td class="f">Ergänzende Hinweise</td><td>Rest, der in keinen anderen Bogen gehört</td><td>nichts</td><td>---</td><td>Gesundheitsangaben gehören in Bogen B</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h3>Grobverteilung auf die anderen Bögen</h3>
+  <div class="grid">
+    <div class="panel"><h3>Gesundheitsbogen B</h3><p>Diagnose, Bandscheibe, OP, Reha, MRT, Ärzte, Gewicht, Schmerz, Konzentration, Antrieb, Motivation, „Impulse von außen“, sitzen/stehen, Treppe.</p></div>
+    <div class="panel"><h3>Erhebungsbogen C</h3><p>Alles Alltägliche nach Lebensbereich: Fahrrad und Bus (LB 4), Arzttermine und Essen (LB 5), Einkaufen, Kochen, Wäsche (LB 6), Kontakt und Kollegen (LB 7), Werkstatt und Arbeitszeiten (LB 8), Musik, Urlaub, Freizeit (LB 9).</p></div>
+    <div class="panel"><h3>GP-Vorbereitung</h3><p>Wünsche und Ziele: „Fernziel“, „wünscht sich“, „kann ich mir vorstellen“, „überlegs mir“, „nächstes Jahr“. Lebensform: „wohne mit der Familie im gleichen Haus“. Ressourcen: „arbeitest genau und gewissenhaft“.</p></div>
+  </div>
+</section>
+
+<section id="test">
+  <h2>Testlauf an Beispiel 1</h2>
+  <p class="sub">Der Prompt wurde mit Protokoll und Erhebungsbogen von Beispiel 1 durchgeführt und gegen den tatsächlich ausgefüllten Basisbogen abgeglichen.</p>
+  <div class="stats">
+    <div class="stat"><b>11</b><span>Treffer: gleicher Eintrag wie die Referenz</span></div>
+    <div class="stat"><b>8</b><span>korrekt OFFEN: Aktendaten, nicht im Protokoll</span></div>
+    <div class="stat"><b>2</b><span>Mehrwert: Ort und Teilnehmende, in der Referenz leer</span></div>
+    <div class="stat"><b>0</b><span>Fehlzuordnungen</span></div>
+  </div>
+  <p class="note">Die drei Fallen aus Beispiel 1 werden abgefangen: Kinder der Pflegemutter, Bandscheibenvorfall als körperliche Behinderung, Betreuerin ohne Klärung der Art. Der Standardsatz zum Versand wird wörtlich übernommen.</p>
+  <details>
+    <summary>Soll-Ausgabe der KI für Beispiel 1 anzeigen</summary>
+    <pre class="soll">BEI_BW A – BASISBOGEN – AUSFÜLLLISTE
+Legende: [X] = ankreuzen · [ ] = leer lassen · TEXT: = eintragen · OFFEN = aus der Akte ergänzen
+Status je Feld: BELEGT / ABGELEITET (bitte prüfen) / OFFEN
+
+1 ANGABEN ZUR PERSON
+1.1 Stammdaten
+Name, Vorname: TEXT: Apfelkuchen, Anna | Status: BELEGT | Beleg: „Frau Anna Apfelkuchen hat als primäres Thema aktuell die Verbesserung der gesundheitlichen Lage.“ (Quelle 2, Ergänzende Hinweise); „FS: Anna Apfelkuchen war sehr fit die letzten Monate“ (Quelle 1, FS)
+Geburtsdatum: TEXT: OFFEN | Status: OFFEN | Beleg: kein Datum in den Quellen
+Geschlecht: [X] weiblich [ ] männlich [ ] divers | Status: ABGELEITET (bitte prüfen) | Beleg: „Frau Anna Apfelkuchen“ (Quelle 2); „Sie hatte einen dreifachen Bandscheibenvorfall“ (Quelle 1, FS)
+Familienstand: [ ] ledig [ ] verheiratet [ ] verwitwet [ ] geschieden | Status: OFFEN | Beleg: keine Angabe zu Ehe oder Partnerschaft in den Quellen
+Anzahl der Kinder: TEXT: OFFEN | davon im eigenen Haushalt: TEXT: OFFEN | Status: OFFEN | Beleg: keine Angabe der Person zu eigenen Kindern. Hinweis: „FS: sie spielt gerne mit meinen 3 Kindern“ sind Kinder von FS.
+Staatsangehörigkeit: [ ] deutsch [ ] andere, und zwar: TEXT: OFFEN | Status: OFFEN | Beleg: keine Angabe in den Quellen
+1.2 Kontaktdaten
+Straße und Hausnr.: TEXT: OFFEN | Status: OFFEN
+Postleitzahl und Ort: TEXT: OFFEN | Status: OFFEN (Hinweis, keine Adresse: „FS: es sind 5KM bis zur Bushaltestelle in Bad Wurzach. Wir wohnen sehr außerhalb.“)
+Telefon: TEXT: OFFEN | Status: OFFEN
+E-Mail: TEXT: OFFEN | Status: OFFEN
+Ergänzende Hinweise: TEXT: ---
+1.3 Rechtliche Vertretung
+Erwachsene: [ ] keine [ ] Vollmacht [X] rechtliche Betreuung [ ] sonstige | Status: ABGELEITET (bitte prüfen) | Beleg: „FS: Es gab jetzt ein Betreuerinnenwechsel. Zu Frau Koch hatte sie einen engen Kontakt, mit Frau Holzmann jetzt klappt die Organisation gut, sie haben aber keinen so engen Kontakt.“ (Quelle 1, FS). Aus dem Protokoll geht nicht hervor, ob eine rechtliche Betreuung gemeint ist; Akte prüfen.
+Kinder und Jugendliche: [ ] beide Eltern [ ] nur Mutter [ ] nur Vater | Status: OFFEN (Person ist erwachsen, Spalte bleibt leer)
+Aufgabenbereiche: [ ] Vermögenssorge [ ] Gesundheitsfürsorge [ ] Aufenthaltsbestimmung [ ] Vertretung gegenüber Behörden, Versicherungen, Renten- und Sozialleistungsträgern [ ] Wohnungsangelegenheiten [ ] Entgegennahme, Öffnen und Anhalten der Post | Status: OFFEN (nur aus Betreuerausweis oder Beschluss)
+Ergänzende Hinweise: TEXT: Frau Koch (bisher), Frau Holzmann (jetzt) – Funktion laut Protokoll „Betreuerin“, bitte prüfen
+1.4 Personen des Vertrauens
+Name, Vorname: TEXT: OFFEN | Status: OFFEN | Beleg: keine Person von der leistungsberechtigten Person als Vertrauensperson benannt. Hinweis: FS (Pflegemutter) kommt in Frage: „FF: Die ärztliche Begleitung teilen wir uns, wir sind viel im Austausch.“
+Kontaktdaten: TEXT: OFFEN | Status: OFFEN
+Ergänzende Hinweise: TEXT: ---
+
+2 GESPRÄCHE ZUR BEDARFSERMITTLUNG
+2.1 Datum, Ort und Beteiligte
+Datum, Ort: TEXT: Datum OFFEN; Ort: Werkstatt der Liebenau | Status: Datum OFFEN, Ort ABGELEITET (bitte prüfen) | Beleg: „Danach bin ich hierhergekommen (Liebenau).“ (Quelle 1, Person); „Hier her fahre ich mit dem Bus.“ (Quelle 1, Person); „FS: Im Dezember hast du hier angefangen.“ (Quelle 1, FS); „Aus dem Gespräch am XX.XX.XXXX“ (Quelle 2)
+Teilnehmende Personen mit Funktion und Kürzel: TEXT: Frau Anna Apfelkuchen – leistungsberechtigte Person (ohne Kürzel); FS – Frau S. – Pflegemutter (Betreutes Wohnen in Familien); FF – Frau F. – Begleitung außerhalb der Werkstatt; FD – Fachdienst der Werkstatt (Liebenau); SD – Sozialer Dienst Landratsamt, bedarfsermittelnde Fachkraft | Status: BELEGT (Kürzel aus Quelle 1), Funktionen aus Legende | Beleg: Kürzel FS, FF, FD, SD kommen im Protokoll vor; Aussagen ohne Kürzel in Ich-Form
+Ergänzende Hinweise: TEXT: ---
+2.2 Kommunikationshilfen
+[X] nicht erforderlich [ ] erforderlich, und zwar: TEXT: – | Status: ABGELEITET (bitte prüfen) | Beleg: Person antwortet selbst in ganzen Sätzen („Ich bin im Innenbereich und arbeite gerne mit Fahrradtaschen.“); kein Signalwort für Kommunikationshilfen in den Quellen
+
+3 DOKUMENTATION DER BEDARFSERMITTLUNG
+3.1 Erst- oder Folgeermittlung
+[ ] Erstermittlung [X] Folgeermittlung | Status: ABGELEITET (bitte prüfen) | Beleg: „Letzter Teilhabebericht für weitere Informationen beachten“ (Quelle 2); „Aus dem Teilhabebericht vom 13.02.26:“ (Quelle 2); „Siehe Vorbereitungsbogen“ (Quelle 2)
+Datum der letzten Bedarfsermittlung: TEXT: OFFEN | abgeschlossen am: TEXT: OFFEN | Status: OFFEN
+Datum der vorliegenden Bedarfsermittlung: TEXT: OFFEN | abgeschlossen am: TEXT: OFFEN | Status: OFFEN
+3.2 Bedarfsermittelnde Fachkraft
+Name, Vorname: TEXT: OFFEN | Stelle: TEXT: Sozialer Dienst Landratsamt | Kontaktdaten: TEXT: OFFEN | Status: Stelle aus Legende (SD), Rest OFFEN
+3.3 Versand der ausgefüllten Bögen
+[ ] ja [X] nein | Status: ABGELEITET (bitte prüfen) | Beleg: kein Signalwort („zugeschickt“, „Kopie“, „per Post“) in den Quellen
+Ergänzende Hinweise: TEXT: Der Wunsch zum Erhalt des BEI BW wurde im Gespräch nicht geäußert.
+
+4 BEHINDERUNG UND PFLEGEGRAD
+4.1 Schwerbehinderung
+[ ] ja, GdB: TEXT: OFFEN | Merkzeichen: TEXT: OFFEN | [ ] beantragt | [ ] nein | Status: OFFEN | Beleg: kein Signalwort (GdB, Ausweis, Merkzeichen) in den Quellen
+Ergänzende Hinweise: TEXT: ---
+4.2 Wesentliche Behinderung
+[ ] liegt vor [ ] droht [ ] noch nicht festgestellt | Status: OFFEN | Beleg: keine ausdrückliche Angabe in den Quellen
+[ ] körperliche [ ] seelische [ ] geistige [ ] Sinnesbeeinträchtigungen | Status: OFFEN | Beleg: keine ausdrückliche Angabe. Hinweis: „Sie hatte einen dreifachen Bandscheibenvorfall“ (Quelle 1, FS) ist eine Gesundheitsangabe für Bogen B und begründet kein Kreuz bei „körperliche“.
+Ergänzende Hinweise: TEXT: ---
+4.3 Pflegegrad
+[ ] ja, Pflegegrad: [ ] 1 [ ] 2 [ ] 3 [ ] 4 [ ] 5 | [ ] beantragt | [ ] nein | Status: OFFEN | Beleg: kein Signalwort (Pflegegrad, Pflegekasse, Medizinischer Dienst) in den Quellen
+Ergänzende Hinweise: TEXT: ---
+
+5 ERGÄNZENDE HINWEISE (GESAMT)
+TEXT: ---
+
+NICHT ZUGEORDNET
+(Protokollstellen mit Bezug zum Basisbogen, die keinem Feld sicher zuzuordnen sind. Wörtlich, mit Kürzel. Sonst: keine.)
+- keine
+
+SELBSTPRÜFUNG
+1 Alle 5 Abschnitte und alle Felder in der Reihenfolge der Vorlage ausgegeben? ja
+2 Jedes [X] hat einen Beleg aus Quelle 1 oder Quelle 2? ja
+3 Kein Feld aus Allgemeinwissen oder Vermutung gefüllt? ja
+4 Kinder oder Angehörige anderer Sprecher nicht der Person zugerechnet? ja
+5 In Abschnitt 4 nichts angekreuzt, was nicht ausdrücklich GdB, Pflegegrad oder wesentliche Behinderung nennt? ja
+6 Alle Belege buchstabengetreu mit Sprecherkürzel? ja</pre>
+  </details>
+  <h3>Nächste Schritte</h3>
+  <p>Prompt 2 für den Gesundheitsbogen B: aus dem Gespräch kommen nur die Spalte „Erläuterungen“ und die „Ergänzenden Hinweise“; Diagnosen und ICF-Codes kommen aus der Akte. Prompt 3 für die GP-Vorbereitung: vorher klären, ob dort wörtliche Zitate oder eine Zusammenfassung in der dritten Person stehen sollen, denn das Beispiel ist zusammengefasst.</p>
+</section>
+
+<footer>Grundlage: BEI_BW 2024, Stand 10.09.2024 (Ministerium für Soziales, Gesundheit und Integration Baden-Württemberg). Beispieldaten sind anonymisiert.</footer>
+</div>
+
+<script>
+(function(){
+  var btn=document.getElementById('copyBtn');
+  btn.addEventListener('click',function(){
+    var txt=document.getElementById(btn.dataset.target).textContent;
+    function done(ok){btn.textContent=ok?'Kopiert':'Kopieren fehlgeschlagen, bitte markieren';btn.classList.toggle('done',ok);setTimeout(function(){btn.textContent='Prompt kopieren';btn.classList.remove('done')},2200)}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){done(true)},function(){done(false)})}
+    else{try{var r=document.createRange();r.selectNodeContents(document.getElementById(btn.dataset.target));var s=window.getSelection();s.removeAllRanges();s.addRange(r);done(document.execCommand('copy'))}catch(e){done(false)}}
+  });
+})();
+</script>
